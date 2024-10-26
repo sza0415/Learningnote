@@ -2,9 +2,9 @@
 
 
 
-![image-20241017161050650](C:\Users\SZA\AppData\Roaming\Typora\typora-user-images\image-20241017161050650.png)
+![image-20241017161050650](JavaWeb基础.assets/image-20241017161050650.png)
 
-![image-20241017161121921](C:\Users\SZA\AppData\Roaming\Typora\typora-user-images\image-20241017161121921.png)
+![image-20241017161121921](JavaWeb基础.assets/image-20241017161121921.png)
 
 
 

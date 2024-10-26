@@ -335,7 +335,7 @@
 
 ### JDBC：Java DataBase Connectivity 可以为多种**关系型数据库**DBMS提供统一的访问方式，目的就是为了用Java来操作数据库。
 
-![image-20241012115035322](C:\Users\SZA\AppData\Roaming\Typora\typora-user-images\image-20241012115035322.png)
+![image-20241012115035322](JavaWeb基础.assets/image-20241012115035322.png)
 
 操作数据库最直接的方式是通过驱动（其实就是一个jar包）来操作，不同的厂商有不同的驱动（oracle数据库就是oracle驱动程序，mysql，sqlserver分别是mysql驱动、sqlserver驱动）。
 
@@ -343,7 +343,7 @@ JDBC是统一的访问方式，可以屏蔽掉数据库的细节，在java程序
 
 因此java程序只需要使用jdbc去操作JDBC DriverManager就可以操作不同的驱动，从而操作数据库。
 
-![image-20241012115716521](C:\Users\SZA\AppData\Roaming\Typora\typora-user-images\image-20241012115716521.png)
+![image-20241012115716521](JavaWeb基础.assets/image-20241012115716521.png)
 
 1. jdbc API（<u>**<font color=red>我们主要学的内容</font>**</u> ）：提供各种操作访问接口，Connection、Statement、PreparedStatement、ResultSet
    1. DriverManager：管理jdbc驱动
@@ -1155,7 +1155,7 @@ JavaBean（就是一个Java类）的定义：满足一下2点 ，就可以称为
   	返回给 请求处 。 可以用jsp实现，  但是一般建议使用 Servlet实现控制器。
 * Jsp->Java(Servlet)->JSP
 
-![image-20241018105735102](C:\Users\SZA\AppData\Roaming\Typora\typora-user-images\image-20241018105735102.png)
+![image-20241018105735102](JavaWeb基础.assets/image-20241018105735102.png)
 
 ###  Servlet基础：
 
@@ -1181,7 +1181,7 @@ Serlvet2.5：web.xml:
 Servlet流程：
 请求 -><url-pattern> -> 根据<servlet-mapping>中的<servlet-name> 去匹配  <servlet> 中的<servlet-name>，然后寻找到<servlet-class>，求中将请求交由该<servlet-class>执行。
 
-![image-20241018142854470](C:\Users\SZA\AppData\Roaming\Typora\typora-user-images\image-20241018142854470.png)
+![image-20241018142854470](JavaWeb基础.assets/image-20241018142854470.png)
 
 ### Servlet生命周期：5个阶段 
 
@@ -1210,7 +1210,7 @@ destroy()：关闭tomcat服务时，执行一次。
 
 # MVC案例实践
 
-![image-20241023114525718](C:\Users\SZA\AppData\Roaming\Typora\typora-user-images\image-20241023114525718.png)
+![image-20241023114525718](JavaWeb基础.assets/image-20241023114525718.png)
 
 login.jsp:
 
@@ -1390,9 +1390,9 @@ public class loginbean {
 
 # 三层架构详解
 
-![image-20241023154525327](C:\Users\SZA\AppData\Roaming\Typora\typora-user-images\image-20241023154525327.png)
+![image-20241023154525327](assets/image-20241023154525327.png)
 
-![image-20241023155308068](C:\Users\SZA\AppData\Roaming\Typora\typora-user-images\image-20241023155308068.png)
+![image-20241023155308068](JavaWeb基础.assets/image-20241023155308068.png)
 
 三层组成:
 
@@ -1425,7 +1425,9 @@ public class loginbean {
       2. 实现类：implements 起名 XxxServiceImpl 
          1. 实现类所在的包：xxx.dao.impl  xxx.service.impl
 2. DBUtil 通用的数据库帮助类，可以简化Dao类的代码量
-   1. 
+   1. \
+
+
 
 
 
