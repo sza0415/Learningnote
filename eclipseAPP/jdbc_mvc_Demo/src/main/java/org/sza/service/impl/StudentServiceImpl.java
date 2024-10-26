@@ -12,10 +12,10 @@ import org.user.service.IStudentService;
 public class StudentServiceImpl implements IStudentService{
 	IStudentDAO stuDAO = new StudentDAOImpl();
 
-
+	
 	// 增 ==> isExistbysno + addStudent
 	public boolean addStudent(Student stu) {
-
+		
 		if (!stuDAO.isExistbysno(stu.getSno())) {
 			stuDAO.addStudent(stu);
 			return true;
