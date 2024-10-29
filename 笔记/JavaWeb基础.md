@@ -1,4 +1,4 @@
-# JSP页面元素
+JSP页面元素
 
 - a.脚本Scriptlet
 
@@ -324,6 +324,161 @@
 - page
 
 - exception
+
+## **JSP运行原理**
+
+当用户访问JSP页面时，JSP页面的处理过程如图所示:
+
+![img](JavaWeb基础.assets/337375-20190411125716354-1493799102.png)
+
+<font color=blue>**JSP预处理和编译阶段**</font>
+
+客户第一次请求jsp页面时，jsp引擎会将jsp文件中的脚本代码(HTML)和代码片段(Java代码)全部转换为java代码，转换过程非常直观：对于HTML文本只需要用简单的out.println方法包裹，对于java脚本只做保留或简单的处理。预处理阶段把jsp文件解析为java代码，编译阶段jsp引擎把java代码编译成servlet类文件，对于Tomcat，生成的class文件默认情况下存放在`<Tomcat>/work`目录下。可以简单看一下index.jsp生成的index_jsp.java代码:
+
+![image-20241029165856942](JavaWeb基础.assets/image-20241029165856942.png)
+
+```java
+public void _jspService(final javax.servlet.http.HttpServletRequest request, final javax.servlet.http.HttpServletResponse response)
+      throws java.io.IOException, javax.servlet.ServletException {
+
+    if (!javax.servlet.DispatcherType.ERROR.equals(request.getDispatcherType())) {
+      final java.lang.String _jspx_method = request.getMethod();
+      if ("OPTIONS".equals(_jspx_method)) {
+        response.setHeader("Allow","GET, HEAD, POST, OPTIONS");
+        return;
+      }
+      if (!"GET".equals(_jspx_method) && !"POST".equals(_jspx_method) && !"HEAD".equals(_jspx_method)) {
+        response.setHeader("Allow","GET, HEAD, POST, OPTIONS");
+        response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED, "JSP 只允许 GET、POST 或 HEAD。Jasper 还允许 OPTIONS");
+        return;
+      }
+    }
+
+    final javax.servlet.jsp.PageContext pageContext;
+    javax.servlet.http.HttpSession session = null;
+    final javax.servlet.ServletContext application;
+    final javax.servlet.ServletConfig config;
+    javax.servlet.jsp.JspWriter out = null;
+    final java.lang.Object page = this;
+    javax.servlet.jsp.JspWriter _jspx_out = null;
+    javax.servlet.jsp.PageContext _jspx_page_context = null;
+
+
+    try {
+      response.setContentType("text/html; charset=UTF-8");
+      pageContext = _jspxFactory.getPageContext(this, request, response,
+      			null, true, 8192, true);
+      _jspx_page_context = pageContext;
+      application = pageContext.getServletContext();
+      config = pageContext.getServletConfig();
+      session = pageContext.getSession();
+      out = pageContext.getOut();
+      _jspx_out = out;
+
+      out.write("\r\n");
+      out.write("<!DOCTYPE html>\r\n");
+      out.write("<html>\r\n");
+      out.write("<head>\r\n");
+      out.write("<meta charset=\"UTF-8\">\r\n");
+      out.write("<title>Insert title here</title>\r\n");
+      out.write("</head>\r\n");
+      out.write("<body>\r\n");
+      out.write("	\r\n");
+      out.write("		<form action=\"uploadservlet\" method=\"post\" enctype=\"multipart/form-data\">\r\n");
+      out.write("			学号：<input name=\"sno\"><br>\r\n");
+      out.write("			姓名：<input name=\"sname\"><br>\r\n");
+      out.write("			上传照片：<input type=\"file\" name=\"spicture\">\r\n");
+      out.write("			<input type=\"submit\" name=\"添加\">\r\n");
+      out.write("		\r\n");
+      out.write("		</form>\r\n");
+      out.write("</body>\r\n");
+      out.write("</html>");
+    } catch (java.lang.Throwable t) {
+      if (!(t instanceof javax.servlet.jsp.SkipPageException)){
+        out = _jspx_out;
+        if (out != null && out.getBufferSize() != 0)
+          try {
+            if (response.isCommitted()) {
+              out.flush();
+            } else {
+              out.clearBuffer();
+            }
+          } catch (java.io.IOException e) {}
+        if (_jspx_page_context != null) _jspx_page_context.handlePageException(t);
+        else throw new ServletException(t);
+      }
+    } finally {
+      _jspxFactory.releasePageContext(_jspx_page_context);
+    }
+  }
+}
+
+```
+
+可以看到生成的_jspService(request,response)
+
+```java
+public void _jspService(final javax.servlet.http.HttpServletRequest request, final javax.servlet.http.HttpServletResponse response)
+```
+
+和我们自己编写的Servlet是相同的。
+
+![image-20241029170613569](JavaWeb基础.assets/image-20241029170613569.png)
+
+但是值得注意的是，JSP九个内置对象，request和response是作为_jspService的参数传入，而其余的内置对象，则会在后续的代码中声明并初始化：
+
+```java
+    // 声明其余内置对象
+	final javax.servlet.jsp.PageContext pageContext;
+    javax.servlet.http.HttpSession session = null;
+    final javax.servlet.ServletContext application;
+    final javax.servlet.ServletConfig config;
+    javax.servlet.jsp.JspWriter out = null;
+    final java.lang.Object page = this;
+    javax.servlet.jsp.JspWriter _jspx_out = null;
+    javax.servlet.jsp.PageContext _jspx_page_context = null;
+```
+
+```java
+    // 初始化其余内置对象
+    try {
+      response.setContentType("text/html; charset=UTF-8");
+      pageContext = _jspxFactory.getPageContext(this, request, response,
+      			null, true, 8192, true);
+      _jspx_page_context = pageContext;
+      application = pageContext.getServletContext();
+      config = pageContext.getServletConfig();
+      session = pageContext.getSession();
+      out = pageContext.getOut();
+      _jspx_out = out;
+      ....
+    }
+```
+
+这也就可以解释，在Servlet的监听器当中，为什么第一次访问jsp页面（pageContext.getSession()），会调用pageContext.getSession()监听器的sessionCreated方法：
+
+```java
+public void sessionCreated(HttpSessionEvent se)
+```
+
+
+
+<font color=blue>**JSP响应阶段**</font>
+
+编译后的class对象被加载到容器中，并根据用户的请求生成HTML格式的响应页面返回给客户端。 
+在执行jsp网页时，通常分为两个时期：转译时期和请求时期。转译时期jsp页面被翻译成Servlet类，然后编译成Class文件;用户请求时期，servlet类被执行，生成HTML响应至客户端。
+
+jsp的转译和请求都在在第一次访问时进行的，所以用户在第一次访问jsp页面时响应时间会比较长。在之后的请求中，这些工作已经完成，时间延长问题不存在了。在处理后续的访问时jsp和servlet的执行速度是一样的。
+
+### 容器、jsp容器、jsp引擎
+
+jsp要转译为servlet，但是servlet没有main()方法，servlet对象的创建、方法的调用由web容器来实现。以Tomcat为例，先看一下Tomcat的总体结构： 
+
+![img](JavaWeb基础.assets/337375-20190411125825127-1858874703.png)
+
+从图中可以看出，Tomcat的核心组建是connector和Container，container就是容器。容器就是负责管理控制servlet的应用程序。图中的jasper就是解析jsp的jsp引擎。Tomcat既是servlet容器又是web服务器，也是jsp引擎。
+
+
 
 # JSP 四种作用域
 
@@ -1491,12 +1646,275 @@ public class loginbean {
       2. 实现类：implements 起名 XxxServiceImpl 
          1. 实现类所在的包：xxx.dao.impl  xxx.service.impl
 2. DBUtil 通用的数据库帮助类，可以简化Dao类的代码量
-   1. \
+
+
+
+# Servlet中的监听器
+
+监听原理：
+
+- 存在事件源：被监听的对象
+- 提供监听器：监听的对象
+- 为事件源注册监听器，事件源与监听器的绑定
+- 操作事件源，产生事件对象，将事件对象传递给监听器，并且执行监听器相应的监听方法。事件：事件源对象的改变-->通过事件获得事件源对象
+
+Servlet中主要用于监听的事件源分别是ServletContext、HttpSession、ServletRequest三个域对象--> application、session、request。
+
+![img](JavaWeb基础.assets/c1e324384d6ebcfcc2dca5da71b548c2.png)
+
+Servlet监听器分为三大类：
+
+1. 监听数据<font color=blue>**域对象创建与销毁的**</font>监听器
+2. 监听数据<font color=blue>**域对象的属性变更**</font>（属性添加、移除、替换）的监听器
+3. 监听<font color=blue>**绑定到 HttpSession 域中的某个对象的状态**</font>的事件监听器
+
+## 1. 监听数据<font color=blue>**域对象创建与销毁的**</font>监听器
+
+**ServletContextListener : 用来监听ServletContext对象的创建和销毁**
+
+1. 监听创建 监听销毁
+ServletContext对象代表全局唯一对象，每个web工程会产生一个ServletContext,服务器启动创建，服务器关闭销毁
+
+编写监听器
+步骤一：编写类实现特定监听器接口
+步骤二：注册监听器，不是通过事件源，而是在web.xml 进行配置
+（**监听器和Servlet、Filter不同，不需要url配置，监听器执行不是由用户访问的，监听器 是由事件源自动调用的**）
+
+**servletContext域对象何时创建和销毁**：
+
+- 创建：服务器启动针对每一个web应用创建servletcontext
+- 销毁：服务器关闭前先关闭代表每一个web应用的servletContext
+
+**ServletContextListener主流应用：**
+**第一个**：在服务器启动时，对一些对象进行初始化，并且将对象保存ServletContext数据范围内(因为在监听器内可以获得事件源对象) — 全局数据
+
+- 例如：创建数据库连接池
+
+**第二个**：对框架进行初始化 例如：Spring框架初始化通过ServletContextListener (因为监听器代码在服务器启动时执行)
+
+- Spring框架(配置文件随服务器启动加载) org.springframework.web.context.ContextLoaderListener
+
+**第三个**：实现任务调度，启动定时程序 （Timer、TimerTask） 使一个程序，定时执行
+
+**比如说每天晚上十二点给过生日的人进行生日祝福，中国移动对账户进行同步，会在服务器使用较少的时间，例如凌晨之类，启动一段程序，进行同步**
+
+java.util.Timer 一种线程设施，用于安排以后在后台线程中执行的任务。可安排任务执行一次，或者定期重复执行。
+Timer提供了启动定时任务方法 schedule
+\* schedule(TimerTask task, Date firstTime, long period) 用来在指定一个时间启动定时器，定期循环执行
+\* schedule(TimerTask task, long delay, long period) 用来在当前时间delay多少毫秒后启动定时器
+停止定时器，timer.cancel取消任务
+
+**HttpSession 数据对象创建和销毁监听器 —– HttpSessionListener**
+
+2. 监听Session对象创建 监听Session对象销毁
+
+​		**Session何时创建**：request.getSession()
+​		**Session何时销毁**：关闭服务器，Session过期，session.invalidate
+​		Session过期时间通过web.xml配置（tomcat配置文件中），默认时间30分钟
+
+**HttpServletRequest对象的创建和销毁监听器 —- ServletRequestListener**
+
+3. 监听request对象创建 监听request对象销毁
+
+​		**Request何时创建**：请求发起时创建
+​		**Request何时销毁**：响应结束时销毁
+
+​		例如：每次刷新界面都会创建销毁一次
+
+​	**注意（创建销毁次数由请求次数决定）：**
+​	**使用forward** —- request创建销毁几次 —– 一次
+​	**使用sendRedirect** —- request创建销毁两次 （两次请求）
+
+Demo：写一个三合一的Listener
+
+![image-20241029154819503](JavaWeb基础.assets/image-20241029154819503.png)
+
+步骤一：编写类实现特定监听器接口
+
+```java
+/*Context_Session_RequestListener.java
+ * 
+ * */
+
+package org.sza.listener;
+
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSessionEvent;
+import javax.servlet.http.HttpSessionListener;
+
+public class Context_Session_RequestListener implements ServletContextListener, HttpSessionListener, ServletRequestListener{
+
+	@Override
+	public void requestDestroyed(ServletRequestEvent sre) {
+		
+		System.out.println("requestDestroyed" + sre.getServletRequest());
+	}
+
+	@Override
+	public void requestInitialized(ServletRequestEvent sre) {
+		System.out.println("requestInitialized" + sre.getServletRequest());
+	}
+
+	@Override
+	public void sessionCreated(HttpSessionEvent se) {
+		System.out.println("sessionCreated" + se.getSession());
+	}
+
+	@Override
+	public void sessionDestroyed(HttpSessionEvent se) {
+		System.out.println("sessionDestroyed" + se.getSession());
+	}
+
+	@Override
+	public void contextDestroyed(ServletContextEvent sce) {
+		System.out.println("contextDestroyed" + sce.getServletContext());
+	}
+
+	@Override
+	public void contextInitialized(ServletContextEvent sce) {
+		System.out.println("contextInitialized" + sce.getServletContext());
+	}
+	
+
+}
+```
+
+步骤二：注册监听器，不是通过事件源，而是在web.xml 进行配置 （**监听器和Servlet、Filter不同，不需要url配置，监听器执行不是由用户访问的，监听器 是由事件源变化自动调用的**）
+
+```xml
+<listener>
+	<listener-class>org.sza.listener.Context_Session_RequestListener</listener-class>
+</listener>
+```
+
+开启服务器：
+
+![image-20241029173439983](JavaWeb基础.assets/image-20241029173439983.png)
+
+第一次访问一个JSP页面（http://localhost:8888/UPload_Download/index.jsp）：
+
+![image-20241029173742007](JavaWeb基础.assets/image-20241029173742007.png)
+
+第二次访问同一个JSP页面（http://localhost:8888/UPload_Download/index.jsp）：
+
+![image-20241029173946905](JavaWeb基础.assets/image-20241029173946905.png)
+
+访问一个servlet（http://localhost:8888/UPload_Download/uploadservlet）：
+
+![image-20241029173702033](JavaWeb基础.assets/image-20241029173702033.png)
+
+具体原因可以看[JSP运行原理](##JSP运行原理)
+
+**Session何时销毁**：关闭服务器，Session过期，session.invalidate 不做演示
+
+关闭服务器：
+
+
+
+## 监听数据<font color=blue>**域对象的属性变更**</font>（属性添加、移除、替换）的监听器
+
+Servlet 规范定义了监听 ServletContext、HttpSession、HttpServletRequest 这三个对象中的属性变更事件的监听器，这三个监听器接口分别是 ServletContextAttributeListener、HttpSessionAttributeListener 和 ServletRequestAttributeListener。这三个接口中都定义了三个方法，用来处理被监听对象中属性的增加，删除和替换事件。同一种事件在这三个接口中对应的方法名称完全相同，只是参数类型不同
+
+![img](JavaWeb基础.assets/z6nil6zbsjc2u_b2df6856c3ab46c483fe3786d37f95bf.png)
 
 
 
 
 
+### 监听<font color=blue>**绑定到 HttpSession 域中的某个对象的状态**</font>的事件监听器
+
+Session 中的对象可以有多种状态：**绑定到 Session 中、从 Session 中解除绑定、随 Session 对象持久化到存储设备中(钝化)、随 Session 对象从存储设备中恢复（活化）**。Servlet 规范中定义了两个特殊的监听器接口，用来帮助对象了解自己在 Session 中的状态：HttpSessionBindingListener 接口和 HttpSessionActivationListener 接口 ，<font color=red>**实现这两个接口的类不需要进行注册**</font>。
+
+HttpSessionBindingListener Demo:
+
+在该监听器中实现HttpSessionBindingListener接口的两个抽象方法：
+
+1、valueBound()：向HttpSession对象中添加该类对象数据时自动执行该方法
+2、valueUnbound()：从HttpSession对象中删除该类对象数据时会自动执行该方法
+
+```java
+package org.sza.entity;
+
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+
+public class Student implements HttpSessionBindingListener {
+
+	private String name;
+	
+    public Student(String name) {
+		this.name = name;
+	}
+    public Student() {
+    	
+    }
+	public void valueBound(HttpSessionBindingEvent arg0)  { 
+         System.out.println("Student类对象" + "被添加到了session");
+    }
+    public void valueUnbound(HttpSessionBindingEvent arg0)  { 
+    	System.out.println("Student类对象" + "被从session中删除了");
+    }	
+}
+
+```
+
+写一个servlet执行一下session.setAttribute和session.removeAttribute
+
+```java
+package org.sza.servlet;
+
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.sza.entity.Student;
+
+
+@WebServlet("/httpsessionbindingdemo")
+public class HttpSessionBindingDemo extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+  
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		Student student = new Student();
+		request.getSession().setAttribute("student1", student);
+		request.getSession().removeAttribute("student1");
+		
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+		doGet(request, response);
+	}
+
+}
+
+```
+
+执行http://localhost:8888/UPload_Download/httpsessionbindingdemo
+
+![image-20241029180049625](JavaWeb基础.assets/image-20241029180049625.png)
+
+
+
+HttpSessionActivationListener：
+保存在Session域中的对象有两种存储状态：文件“SESSION.ser”中或内存中
+HttpSessionActivationListener接口用于监听实现该接口和Serializable接口的Java类的对象随session钝化和活化事件，可以通过实现HttpSessionActivationListener接口的两个抽象方法来感知存储在HttpSession对象中的该类对象数据从内存保存到“SESSION.ser”文件中和从“SESSION.ser”文件中读取到内存中的时机
+创建HttpSessionActivationListener监听器：
+
+1、创建一个普通Java类，实现HttpSessionActivationListener接口
+2、(eclipse)直接创建一个Listener，选择实现HttpSessionActivationListener接口
+在该监听器中实现HttpSessionActivationListener接口的两个抽象方法：
+
+1、sessionDidActivate()：当绑定到HttpSession对象中的对象将要随HttpSession对象被活化（从硬盘中“SESSION.ser”文件内读到内存中）之后，自动执行该方法
+2、sessionWillPassivate()：当绑定到HttpSession对象中的对象将要随HttpSession对象被钝化（向硬盘中“SESSION.ser”文件内写入HttpSession对象）之前，自动执行该方法
 
 
 

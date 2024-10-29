@@ -8,4 +8,8 @@
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
 
+
+<listener>
+	<listener-class>org.sza.listener.Context_Session_RequestListener</listener-class>
+</listener>
 </web-app>

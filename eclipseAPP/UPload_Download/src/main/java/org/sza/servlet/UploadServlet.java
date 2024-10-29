@@ -15,9 +15,6 @@ import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 @WebServlet("/uploadservlet")
 public class UploadServlet extends HttpServlet {
-
-
-
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		request.setCharacterEncoding("utf-8");
 		response.setCharacterEncoding("utf-8");
