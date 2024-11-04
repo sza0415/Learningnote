@@ -6,98 +6,73 @@
     <title>Document</title>
 </head>
 <body>
+    <img id="img1" src="../笔记/前端入门.assets/image-20241030195107388.png"> <br>
+
+    <div class="cls1">xxxx1</div> <br>
+    <div class="cls1">xxxx2</div> <br>
+
+    <input type="checkbox" name="hobby"> 电影
+    <input type="checkbox" name="hobby"> 旅游
+    <input type="checkbox" name="hobby"> 游戏
+
+    
     <script>
-        // alert(parseInt("123")); // 123
-        // // 把不是数字的前的仍会转为数字
-        // alert(parseInt("123a")); // 123
-        // alert(parseInt("98snj")); // 98
-        // alert(parseInt("a123")); // NaN
+        // 获取Element元素
 
-        // function add(a , b){
-        //     return a + b;
-        // }
-        // var result = add(10,20);
-        // alert(result);
-        // var add = function(a,b){
-        //     return a + b;
-        // }
-        // alert(add(10,20));
+        // 1.1 获取元素，根据ID获取
+        var img = document.getElementById('img1');
+        console.log(img);
 
-        var array1 = new Array(1,2,3,4); // 方式1
-        var array2 = [1,2,3,4]; // 方式2
+        // 1.2 根据标签获取
+        var divS = document.getElementsByTagName('div');
+        // innerHTML设置或者返回元素的对象
+        divS[0].innerHTML = "learning note bro";
+
+        // 为所有div标签的内容后面加入 author:sza(红色字体)
+
+        for (let i = 0; i < divS.length ; i++){
+            // innerHTML是可以识别html标签的  
+            divS[i].innerHTML += "<font color=red>author:sza < /font>";  
+        }
+
+        // 1.3 根据name属性获取
+        var checkboxS = document.getElementsByName('hobby');
+
+        // 使所有的复选框呈现选中状态
+        for (let i = 0; i < checkboxS.length ; i++){
+            checkboxS[i].checked = true;
+        }
+
+        // 1.4 根据class属性获取
+
+        var clsS = document.getElementsByClassName("cls1");
+        for (let i = 0; i < clsS.length ; i++){
+            console.log(clsS[i]);
+        }
+
         
-        // 访问
-        array1[10] = 100;
-        console.log(array1[10]); // 100
-        console.log(array1[9]);//undefined
-        console.log(array1[8]);//undefined
 
-        array1[9] = "A";
-        console.log(array1);
-        //         [
-        //     1,
-        //     2,
-        //     3,
-        //     4,
-        //     null,
-        //     null,
-        //     null,
-        //     null,
-        //     null,
-        //     "A",
-        //     100
-        // ]
-        // var str = new String("hello string  ");
-        // var str1 = "hello string";
-
-
-        // var str2 = 'hello string';
         
-        // console.log(str.charAt(1));//e
-        // console.log(str.indexOf('l'));//2
-        // console.log(str.trim().length);//12
-        // console.log(str.substring(0,2));//he
-
-        // 定义格式
-        // var user =  {
-        //     name:"tom",
-        //     age:20,
-        //     gender:"male",
-        //     // eat:function(){
-        //     //     console.log("用饭");
-        //     // }
-        //     // 简化
-        //     eat(){
-        //         console.log("用饭");
-        //     }
-        // }
-
-        // //调用格式
-        // console.log(user.age);
-
-        // user.eat();
-
-
-
-        // // 定义JSON字符串
-        // var userStr = '{"name":"jerry","age":18,"addr":["beijing","shanghai","xian"]}'; 
-
-        // // JSON字符串转为JS对象
-        // var jsObject = JSON.parse(userStr);
-
-        // // JSON对象转为JSON字符串
-        // var jsonStr = JSON.stringify(jsObject);
-
-        // console.log(jsObject.name);
-        // console.log(jsonStr);
-
-        // // 定时器 周期性地执行某一个函数 毫秒
-        // setInterval(function(){
-        //     console.log("test");
-        // },2000);
-        
-        // console.log(location.href);
-        location.href = "https://www.baidu.com";
     </script>
+
+    <!-- 通过html标签中的事件属性进行绑定 -->
+    <input type="button" onclick="on()" value="按钮1">
+    <script>
+        function on(){
+            alert("按钮1被点击了");
+        }
+    </script>
+
+    <!-- 通过DOM属性绑定 -->
+    <input type="button" id="button2" value="按钮2">
+
+    <script>
+
+        var button2 = document.getElementById("button2");
+        button2.onclick = function(){
+            alert("按钮2被点击");
+        }
+    </script>
+
 </body>
 </html>
