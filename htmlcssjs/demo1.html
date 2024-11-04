@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        // alert(parseInt("123")); // 123
+        // // 把不是数字的前的仍会转为数字
+        // alert(parseInt("123a")); // 123
+        // alert(parseInt("98snj")); // 98
+        // alert(parseInt("a123")); // NaN
+
+        // function add(a , b){
+        //     return a + b;
+        // }
+        // var result = add(10,20);
+        // alert(result);
+        // var add = function(a,b){
+        //     return a + b;
+        // }
+        // alert(add(10,20));
+
+        var array1 = new Array(1,2,3,4); // 方式1
+        var array2 = [1,2,3,4]; // 方式2
+        
+        // 访问
+        array1[10] = 100;
+        console.log(array1[10]); // 100
+        console.log(array1[9]);//undefined
+        console.log(array1[8]);//undefined
+
+        array1[9] = "A";
+        console.log(array1);
+        //         [
+        //     1,
+        //     2,
+        //     3,
+        //     4,
+        //     null,
+        //     null,
+        //     null,
+        //     null,
+        //     null,
+        //     "A",
+        //     100
+        // ]
+    </script>
+</body>
+</html>
