@@ -187,7 +187,7 @@ export default App;
 
 如果写成：
 
-```javascript
+```jsx
 <button onClick={handleClick("jack")} ></button>
 ```
 
@@ -466,7 +466,7 @@ const loginUser = {
 
 - 使用<font color=yellow>map方法</font>对列表数据进行遍历渲染（别忘了加key）
 
-```javascript
+```jsx
           {/* 评论项 */}  
           {/* 2. 使用map方法对数据列表进行遍历渲染 */}
           {commentList.map(item => (
@@ -559,7 +559,7 @@ const tabs = [
 
 -   使用map方法对tab数组进行遍历渲染
 
-```javascript
+```jsx
       {/* 导航 Tab */}
       <div className="reply-navigation">
         <ul className="nav-bar">
@@ -589,7 +589,7 @@ const tabs = [
   }
 ```
 
-```javascript
+```jsx
           {/* 使用map进行列表数据遍历渲染 需要加上key */}
           <li className="nav-sort">
             {tabs.map(item =>(
@@ -627,7 +627,7 @@ const tabs = [
 
 使用了一个三方库lodash进行排序 orderBy( 列表 , 字段 , 排序方式 )
 
-# classnames优化类名控制
+## classnames优化类名控制
 
 classnames是一个简单的JS库，可以非常方便地通过<font color=yellow>条件动态控制class类名的显示</font>
 
@@ -640,3 +640,360 @@ npm install classnames
 ```
 
 ![image-20241105151341159](./react%E5%85%A5%E9%97%A8.assets/image-20241105151341159.png)
+
+# Day2
+
+## 受控表单绑定
+
+使用React组件的状态（useState）控制表单的状态
+
+![image-20241108152142388](./react%E5%85%A5%E9%97%A8.assets/image-20241108152142388.png)
+
+- 准备一个React状态值
+
+```javascript
+const [value1,setValue1] = useState('')
+```
+
+- 通过value属性绑定状态，通过onChange属性绑定状态同步的函数
+
+```jsx
+      {value1}
+      <input value={value1} onChange={(e)=>setValue1(e.target.value)} type='text'>
+      </input>
+```
+
+## React中获取Dom
+
+在React组件中获取/操作DOM，需要使用useRef hook函数，分为两步：
+
+- 使用useRef创建ref对象，并与JSX绑定
+
+```javascript
+// useRef生成ref对象，绑定到dom标签身上
+  const inputRef = useRef(null)
+```
+
+```javascript
+      {/* 使用ref绑定 */}
+      <input ref={inputRef} value="sza"></input>
+```
+
+- 在dom可用时，通过.current获取dom对象
+
+```javascript
+  const onShow = ()=>{
+    // dom可用时，ref.current获取dom
+    console.log(inputRef.current.value);
+  }
+```
+
+```jsx
+      {/* 点击会打印sza的字样 */}
+      <button onClick={onShow}>打印dom</button>
+```
+
+## B站评论 发表评论
+![image-20241108160410674](./react%E5%85%A5%E9%97%A8.assets/image-20241108160410674.png)
+
+获取评论内容：
+
+```javascript
+// 定义一个将要发布的评论 content1
+  const [content1,setContent1] = useState('')
+```
+
+```jsx
+            <textarea
+              value={content1}
+              // ref={textareaRef}
+              onChange={(e) => setContent1(e.target.value)}
+              className="reply-box-textarea"
+              placeholder="发一条友善的评论"
+            />
+```
+
+点击发布按钮发布评论：
+
+```jsx
+            <div className="reply-box-send">
+              <div className="send-text" onClick={() => handleClickPublish()}>发布</div>
+            </div>
+```
+
+```javascript
+// 定义一个将要发布的评论 content1
+  const [content1,setContent1] = useState('')
+
+
+  // 发布评论 这里抄一份之前的评论结构
+  const handleClickPublish = ()=>{
+    setContentList([...commentList,  {
+      rpid: 10086,
+      user: {
+        uid: '30009257',
+        avatar:avatar1,
+        uname: '前端',
+      },
+      content: content1,
+      ctime: '10-19 09:00',
+      like: 667,
+    },])
+  }
+```
+
+## 独一id和时间处理
+
+```javascript
+  {
+    rpid: 1,
+    user: {
+      uid: '30009257',
+      avatar:avatar1,
+      uname: '前端',
+    },
+    content: '学前端就',
+    ctime: '10-19 09:00',
+    like: 66,
+  },
+```
+
+评论的信息 的rpid和cime应该重新设置，分别使用uuid和dayjs
+
+```javascript
+import {v4 as uuidV4} from 'uuid'
+import dayjs from 'dayjs'
+
+  // 发布评论 这里抄一份之前的评论结构
+  const handleClickPublish = ()=>{
+    setContentList([...commentList,  
+      {
+      rpid: 10086,
+      user: {
+        uid: uuidV4(),
+        avatar:avatar1,
+        uname: '前端',
+      },
+      content: content1,
+      ctime: dayjs(new Date()).format('MM-DD hh:mm'),
+      like: 667,
+    }
+  ])
+  }
+```
+
+## b站评论案例 清空内容并重新聚焦
+
+- 清空内容，将input框的value属性设为空字符串
+
+```javascript
+  // 发布评论 这里抄一份之前的评论结构
+  const handleClickPublish = ()=>{
+    setContentList([...commentList,  
+      {
+      rpid: 10086,
+      user: {
+        uid: uuidv4(),// 随机id
+        avatar:avatar1,
+        uname: '前端',
+      },
+      content: content1,
+      ctime: dayjs(new Date()).format('MM-DD hh:mm'),
+      like: 667,
+    }
+  ])
+    setContent1('')
+  }
+```
+
+
+
+- 重新聚焦：拿到input的dom元素，调用focus方法
+
+```javascript
+  const textareaRef = useRef(null)
+  // 发布评论 这里抄一份之前的评论结构
+  const handleClickPublish = ()=>{
+    setContentList([...commentList,  
+      {
+      rpid: 10086,
+      user: {
+        uid: uuidv4(),// 随机id
+        avatar:avatar1,
+        uname: '前端',
+      },
+      content: content1,
+      ctime: dayjs(new Date()).format('MM-DD hh:mm'),
+      like: 667,
+    }
+  ])
+    setContent1('')
+    // 先使用 ref绑定 聚焦
+    textareaRef.current.focus()
+  }
+```
+
+## 父子通信 父传子 父组件传参给子组件
+
+```javascript
+// 父传子
+// 1. 父组件传递数据 自组件标签身上绑定属性
+// 2. 自组件接受数据 props的参数
+function Son(props){
+    // props：对象里面包含了父组件中传递过来的所有数据
+    
+    console.log(props);
+    
+    return   <div>this is Son {props.fuck}-----{props.a}</div>
+}
+function App2(){
+    const var1 = "this is father variable"
+    const var2 = "this is father variable2"
+    return (
+        <div>
+            <Son name={var1} a={var2}/>
+        </div>
+    )
+}
+
+export default App2
+```
+
+传过来的props Object
+
+![image-20241108203749454](./react%E5%85%A5%E9%97%A8.assets/image-20241108203749454.png)
+
+- props可传递任意的数据：数字、字符串、布尔值、数组、对象、函数、JSX
+
+```javascript
+function App2(){
+    const var1 = "this is father variable"
+    const var2 = "this is father variable2"
+    return (
+        <div>
+            <Son 
+            name={var1} 
+            a={var2}
+            isTrue={false}
+            list={['Vue','React']}
+            obj={{name:'sza'}}
+            cb={()=>{console.log('something else')}}
+            children = {<span>what?</span>}
+            />
+        </div>
+    )
+}
+
+export default App2
+```
+
+![image-20241108204342415](./react%E5%85%A5%E9%97%A8.assets/image-20241108204342415.png)
+
+- props是只读对象
+
+子组件<font color=yellow>只能读取props中的数据，不能直接进行修改</font>，父组件的数据只能由父组件修改
+
+特殊的prop children
+
+场景：当我们把内容嵌套在自组件标签当中时，父组件会自动在名为children的prop属性中接受改内容
+
+```javascript
+// 父传子
+// 1. 父组件传递数据 自组件标签身上绑定属性
+// 2. 自组件接受数据 props的参数
+function Son(props){
+    // props：对象里面包含了父组件中传递过来的所有数据
+
+    console.log(props);
+    //  默认都是children 
+    return   <div>this is Son {props.children[0]} ----  {props.children[1]} ----  {props.children[2]}</div>
+}
+function App2(){
+    const var1 = "this is father variable1"
+    const var2 = "this is father variable2"
+    return (
+        <div>
+            <Son>
+                {var1}
+                {var2}
+                <span> this is span 3</span>
+            </Son>
+        </div>
+    )
+}
+
+export default App2
+```
+
+![image-20241108210126390](./react%E5%85%A5%E9%97%A8.assets/image-20241108210126390.png)
+
+## 父子通信 子传父
+
+![image-20241108210421185](./react%E5%85%A5%E9%97%A8.assets/image-20241108210421185.png)
+核心思路是：在子组件中调用父组件中的函数并传递参数
+
+![image-20241108210556251](./react%E5%85%A5%E9%97%A8.assets/image-20241108210556251.png)
+
+子组件调用父组件传的带参函数，子组件在赋值参数的时候，就会传递给了父组件的函数，相当于是子传父
+
+- 在返回的 JSX 结构中，包含一个文本内容 “this is son” 和一个按钮。当按钮被点击时，会调用 `onGetMsg` 函数并将 `sonMsg` 作为参数传递给父组件。
+
+```javascript
+// 父传子
+// 1. 父组件传递数据 自组件标签身上绑定属性
+// 2. 自组件接受数据 props的参数
+function Son(props){
+    const sonMsg = 'this is son msg'
+
+    
+    return  (
+    <div>
+        this is son
+        <br/>
+        <button onClick={()=>props.onGetMsg(sonMsg)}>send</button>
+    </div>)
+}
+function App2(){
+    const getMsg = (msg) =>{
+        console.log(msg)
+    }
+    return (
+        <div>
+            <Son onGetMsg={getMsg}/>
+        </div>
+    )
+}
+
+export default App2
+```
+
+```javascript
+// 父传子
+// 1. 父组件传递数据 自组件标签身上绑定属性
+// 2. 自组件接受数据 props的参数
+// // 接收一个名为 onGetMsg 的属性，该属性是一个函数，用于将子组件的数据传递给父组件
+function Son({onGetMsg}){// onGetMsg必须与<Son onGetMsg={getMsg}/>这里的属性一致
+    const sonMsg = 'this is son msg'
+
+    
+    return  (
+    <div>
+        this is son
+        <br/>
+        <button onClick={()=>onGetMsg(sonMsg)}>send</button>
+    </div>)
+}
+function App2(){
+    const getMsg = (msg) =>{
+        console.log(msg)
+    }
+    return (
+        <div>
+            <Son onGetMsg={getMsg}/>
+        </div>
+    )
+}
+
+export default App2
+```
+

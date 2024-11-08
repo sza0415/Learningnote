@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import './App.scss'
 import avatar1 from './images/bozai.png'
 import avatar2 from './images/bilibili.jpeg'
 import lodash_ from 'lodash'
 import classnames from 'classnames'
-
-
+import {v4 as uuidV4} from 'uuid'
+import dayjs from 'dayjs'
 // 评论列表数据
 const defaultList = [
   {
@@ -14,7 +14,7 @@ const defaultList = [
       uid: '13258165',
       avatar: avatar2,
       uname: '周杰伦',
-    },
+    },   
     content: '哎哟，不错哦',
     ctime: '10-18 08:15',
     like: 89,
@@ -80,8 +80,34 @@ const App = () => {
       if (type === 'hot')setContentList(lodash_.orderBy(commentList,'like','desc'))
       else if (type === 'time')setContentList(lodash_.orderBy(commentList,'ctime','desc'))
   }
+
+// 定义一个将要发布的评论 content1
+  const [content1,setContent1] = useState('')
+
+  const textareaRef = useRef(null)
+  // 发布评论 这里抄一份之前的评论结构
+  const handleClickPublish = ()=>{
+    setContentList([...commentList,  
+      {
+      rpid: uuidV4(),
+      user: {
+        uid: '30009257',// 随机id
+        avatar:avatar1,
+        uname: '前端',
+      },
+      content: content1,
+      ctime: dayjs(new Date()).format('MM-DD hh:mm'),
+      like: 667,
+    }
+  ])
+    setContent1('')
+    // 先使用 ref绑定 聚焦
+    textareaRef.current.focus()
+  }
+
   return (
     <div className="app">
+
       {/* 导航 Tab */}
       <div className="reply-navigation">
         <ul className="nav-bar">
@@ -113,6 +139,29 @@ const App = () => {
       </div>
       
       <div className="reply-wrap">
+
+      <div className="box-normal">
+          {/* 当前用户头像 */}
+          <div className="reply-box-avatar">
+            <div className="bili-avatar">
+              <img className="bili-avatar-img" src={avatar1} alt="用户头像" />
+            </div>
+          </div>
+          <div className="reply-box-wrap">
+            {/* 评论框 */}
+            <textarea
+              value={content1}
+              ref={textareaRef}
+              onChange={(e) => setContent1(e.target.value)}
+              className="reply-box-textarea"
+              placeholder="发一条友善的评论"
+            />
+            {/* 发布按钮 */}
+            <div className="reply-box-send">
+              <div className="send-text" onClick={() => handleClickPublish()}>发布</div>
+            </div>
+          </div>
+        </div>
 
         {/* 评论列表 */}
         <div className="reply-list">
@@ -150,6 +199,8 @@ const App = () => {
             </div>
           ))}
         </div>
+
+
       </div>
     </div>
   )
