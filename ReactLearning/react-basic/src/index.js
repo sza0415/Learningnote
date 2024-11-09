@@ -6,7 +6,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 
 // 导入项目的根组件
-import App from './App2';
+import App from './App3';
 
 // 把APP根组件渲染到id为root的dom节点上
 // 具体为public下的index.html下的root id的dom节点

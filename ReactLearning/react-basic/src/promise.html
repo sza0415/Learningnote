@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script>
+        function job1(){
+            return new Promise((resolve, reject)=>{
+                let timeOut = Math.random() * 2
+                setTimeout(function () {
+                    if (timeOut < 1) {// 这里我们假定timeOut < 1 认为是异步处理成功
+                        resolve(timeOut + 'success')
+                    }else { // 反之 认为是异步处理失败
+                        reject(timeOut + 'fail')
+                    }
+                }, timeOut * 1000)
+            })
+        }
+
+        function job2(successRes){
+            // 返回的必须是Promise的实例
+            return new Promise((resolve,reject)=>{
+                let timeOut = Math.random() * 2
+                setTimeout(function () {
+                    if (timeOut < 1) {// 这里我们假定timeOut < 1 认为是异步处理成功
+                        resolve(timeOut + 'success')
+                    }else { // 反之 认为是异步处理失败
+                        reject(timeOut + 'fail')
+                    }
+                }, timeOut * 1000)
+            })
+        }
+        function job3(successRes){
+            // 返回的必须是Promise的实例
+            return new Promise((resolve,reject)=>{
+                let timeOut = Math.random() * 2
+                setTimeout(function () {
+                    if (timeOut < 1) {// 这里我们假定timeOut < 1 认为是异步处理成功
+                        resolve(timeOut + 'success')
+                    }else { // 反之 认为是异步处理失败
+                        reject(timeOut + 'fail')
+                    }
+                }, timeOut * 1000)
+            })
+        }
+        function handleError1(errorRes){
+            console.log(errorRes + 'Error1')
+        }
+        function handleError2(errorRes){
+            console.log(errorRes + 'Error2')
+        }
+        function handleError3(errorRes){
+            console.log(errorRes + 'Error3')
+        }
+
+
+
+        // job1().then(job2,handleError1).then(job3,handleError2).then(successRes=>{
+        //     console.log(successRes)// 处理最后任务3的操作成功
+        // },handleError3)
+
+        function asyncTask(){
+            return new Promise((resolve,reject)=>{
+                // 假装一些核心代码
+                const isSuccess = true
+                if (isSuccess){
+                    resolve('操作成功')
+                }else{
+                    reject('操作失败')
+                }
+            })
+        }
+
+        async function main() {
+            console.log('a')
+            console.log('b')
+            const data = await asyncTask()
+            console.log(data)
+            console.log('c')
+            console.log('d')
+            console.log('e')
+        }
+        main()
+
+        
+
+
+
+        // const p1 = new Promise((resolve,reject)=>{
+        //     // reject('异步处理失败')
+        //     resolve('异步1处理成功')
+        // })
+
+        // p1.then(successRes1=>{
+        //     console.log(successRes1)
+        //     return new Promise((resolve,reject)=>{
+        //         // resolve('异步2处理成功')
+        //         reject('异步2处理失败')
+        //     })
+        // }).then(successRes2=>{
+        //     console.log(successRes2)
+        // })
+        // .catch(errorRes=>{
+        //     console.log(errorRes)
+        // })
+
+
+
+    </script>
+    
+</body>
+</html>

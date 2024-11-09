@@ -997,3 +997,142 @@ function App2(){
 export default App2
 ```
 
+## 使用状态提升实现兄弟组件通信
+
+![image-20241109125728959](./react%E5%85%A5%E9%97%A8.assets/image-20241109125728959.png)
+
+借助父组件进行兄弟组件之间的数据传递
+
+```javascript
+
+import { useState } from "react"
+
+// 接收一个名为 onGetMsg 的属性，该属性是一个函数，用于将子组件的数据传递给父组件
+function Son1({onGetMsg}){
+    const sonMsg = 'this is son1 msg' // son1 要传递的数据
+
+    
+    return  (
+    <div>
+        <button onClick={()=>onGetMsg(sonMsg)}>send</button>
+    </div>)
+}
+function Son2(props){
+    return <div>{props.msg2}</div>
+}
+function App2(){
+    const [msg_,setMsg_] = useState('')
+    const getMsg = (msg) =>{
+        setMsg_(msg) // son1传来的数据 到了父节点这里使用useState的set 改变该值传给子组件son2
+    }
+    return (
+        <div>
+            <Son1 onGetMsg={getMsg}/>
+            <Son2 msg2={msg_}></Son2>
+        </div>
+    )
+}
+
+export default App2
+```
+
+## 使用Context机制跨层级组件通信
+
+![image-20241109131442948](./react%E5%85%A5%E9%97%A8.assets/image-20241109131442948.png)
+
+```javascript
+// 父传子
+// 1. 父组件传递数据 自组件标签身上绑定属性
+// 2. 自组件接受数据 props的参数
+
+import { createContext, useContext, useState } from "react"
+
+// 1. createContext方法创建一个上下文对象
+const Ctx = createContext()
+
+function Son1(){
+    return  (
+    <div>
+        <Son2/>
+    </div>)
+}
+function Son2(){
+    // 3. 在底层组件 通过useContest钩子函数使用数据 参数为createContext方法创造的上下文对象
+    const msg = useContext(Ctx) 
+    return <div>{msg}</div>
+}
+function App2(){
+    const app2Msg = '顶层msg'
+    return (
+        <div>
+            {/* 2.在顶层组件 通过Provider组件提供数据 */}
+            <Ctx.Provider value={app2Msg}>
+                <Son1 />
+            </Ctx.Provider>
+ 
+        </div>
+    )
+}
+
+export default App2
+```
+
+这里的顶层和底层其实是相对的概念，只要存在嵌套的机制就可以用Context，比如父子
+
+```javascript
+// 父传子
+// 1. 父组件传递数据 自组件标签身上绑定属性
+// 2. 自组件接受数据 props的参数
+
+import { createContext, useContext, useState } from "react"
+
+// 1. createContext方法创建一个上下文对象
+const Ctx = createContext()
+
+function Son1(){
+    // 父子也是顶层和底层 都可以用Context
+    const msg = useContext(Ctx)
+    return  <div>{msg}</div>
+}
+function Son2(){
+    // 3. 在底层组件 通过useContest钩子函数使用数据 参数为createContext方法创造的上下文对象
+    const msg = useContext(Ctx) 
+    return <div>{msg}</div>
+}
+function App2(){
+    const app2Msg = '顶层msg'
+    return (
+        <div>
+            {/* 2.在顶层组件 通过Provider组件提供数据 */}
+            <Ctx.Provider value={app2Msg}>
+                <Son1/>
+                <Son2/>
+            </Ctx.Provider>
+ 
+        </div>
+    )
+}
+
+export default App2
+```
+
+## useEffect概念理解
+
+useEffect是一个React Hook函数，用于在React组件中创建不是由事件（点击、滑动等）引起而是<font color=yellow>由渲染本身引起的操作</font>（发送ajax请求、更改dom等）。
+
+![image-20241109134021323](./react%E5%85%A5%E9%97%A8.assets/image-20241109134021323.png)
+
+说明：上面的组件中没有发生任何的用户事件，<font color=yellow>组件渲染完毕之后</font>就需要和服务器要数据，整个过程属于<font color=yellow>“只由渲染引起的操作”</font>。
+
+需求：在组件渲染完毕后，立刻从服务端获取频道列表数据并显示到页面中
+
+语法：
+
+```javascript
+				useEffect( ()=>{} , [] )
+```
+
+参数1 是一个函数，可以把它称为副作用函数，在函数内部可以放置要执行的操作
+
+参数2 是一个数组，在数组里放置依赖项，不同依赖项会影响第一个参数函数的执行，<font color=yellow>当是一个空数组时，副作用函数只会在组件渲染完毕后执行一次</font>
+
