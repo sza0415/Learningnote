@@ -196,8 +196,6 @@ service层的对象的运行依赖于dao层对象
 
 需求分析:将BookServiceImpl和BookDaoImpl交给Spring管理，并从容器中获取对应的bean对象进行方法调用。
 
-
-
 1. 创建Maven的java项目
 
 2. pom.xml添加Spring的依赖jar包
@@ -367,9 +365,9 @@ public class BookServiceImpl implements BookService {
 
 ![image-20241106113808631](./Spring.assets/image-20241106113808631.png)
 
-![image-20241106113833897](./Spring.assets/image-20241106113833897.png)
+![image-20241111094123811](./Spring.assets/image-20241111094123811.png)
 
-- 注意:配置中的两个bookDao的含义是不一样的
+- 注意:配置中的两个bookDao的含义是不一样的，一个提供方法 一个提供对象
   - name=”bookDao”中`bookDao`的作用是让Spring的IOC容器在获取到名称后，将首字母大写，前面加set找对应的`setBookDao()`方法进行对象注入
   - ref=”bookDao”中`bookDao`的作用是让Spring能在IOC容器中找到id为`bookDao`的Bean对象给`bookService`进行注入
 

@@ -8,7 +8,7 @@ public class Main {
 //        使用Spring ClassPathXmlApplicationContext 完成IOC容器的创建
         ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
 //        使用getBean(String name)方法，其name参数就是我们在bean配置的id，通过这个id来创造对象
-        BookService bookService = (BookService)context.getBean("bookService");
+        BookService bookService = (BookService) context.getBean("bookService");
         bookService.save();
     }
 }
