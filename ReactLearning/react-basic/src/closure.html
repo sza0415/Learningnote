@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>React Example</title>
+    <!-- 引入 React 和 ReactDOM -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+</head>
+<body>
+    <!-- 用于渲染 React 组件的根元素 -->
+    <div id="root"></div>
+
+    <!-- React 组件代码 -->
+    <script type="text/babel">
+        class Example extends React.Component {
+            handleClick(){
+                console.log(this);
+            }
+            render() {
+                return (
+                    <div>
+                        <button onClick={this.handleClick.bind(this)}>click</button>
+                    </div>
+                );
+            }
+        }
+        ReactDOM.render(
+            <Example />,
+            document.getElementById("root")
+        );
+    </script>
+
+    <!-- 引入 Babel 库，允许使用 JSX 语法 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</body>
+</html>

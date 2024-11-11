@@ -1136,3 +1136,40 @@ useEffect是一个React Hook函数，用于在React组件中创建不是由事�
 
 参数2 是一个数组，在数组里放置依赖项，不同依赖项会影响第一个参数函数的执行，<font color=yellow>当是一个空数组时，副作用函数只会在组件渲染完毕后执行一次</font>
 
+```javascript
+import { useEffect, useState } from "react"
+
+
+
+const url = 'http://geek.itheima.net/v1_0/channels' // 获取服务端数据的api
+
+
+
+function App3(){
+    const [list,setList] = useState([])
+    useEffect(()=>{
+        async function getList() {
+          // 当使用fetch进行网络请求时，这个请求是异步发送的。
+          // 程序不会等待请求返回结果才继续执行其他代码。
+            const res = await fetch(url)
+            const jsonRes = await res.json()
+            console.log(jsonRes)
+            setList(jsonRes.data.channels)
+        }
+        getList()
+    },[])
+    return (
+        <div>
+            <ul>
+                {list.map(item => <li key={item.id}>{item.name}</li>)}
+            </ul>
+
+        </div>
+    )
+}
+
+export default App3
+
+
+```
+

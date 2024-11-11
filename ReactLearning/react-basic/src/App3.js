@@ -1,17 +1,28 @@
 import { useEffect, useState } from "react"
 
 
+function useToggle(){
+    const [value,setValue] = useState(true)
+    // console.log('Initial value in useToggle:', value);
+    const toggleFunc = ()=>setValue(!value)
 
-const url = 'http://geek.itheima.net/v1_0/channels' // 获取服务端数据的api
+    return { 
+        value , 
+        toggleFunc
+    }
+}
+
 
 
 
 function App3(){
+    const {value:value_,toggleFunc} = useToggle()
+    console.log(typeof value_)
     return (
         <div>
-            <ul>
-                {list.map(item => <li key={item.id}>{item.name}</li>)}
-            </ul>
+            
+            {value_ && <div>this is toggle</div>}
+            <button onClick={toggleFunc}>toggle</button>
 
         </div>
     )
