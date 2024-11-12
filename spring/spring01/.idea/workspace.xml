@@ -5,13 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5a28109d-b759-42c4-b0c4-c389083c6e56" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/uiDesigner.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/org/sza/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sza/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/org/sza/service/impl/BookServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/org/sza/service/impl/BookServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../笔记/Spring.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../笔记/Spring.md" afterDir="false" />
     </list>
@@ -131,7 +125,7 @@
       <workItem from="1731070889254" duration="17000" />
       <workItem from="1731289247844" duration="1719000" />
       <workItem from="1731291525724" duration="142000" />
-      <workItem from="1731291967086" duration="2296000" />
+      <workItem from="1731291967086" duration="6852000" />
     </task>
     <servers />
   </component>

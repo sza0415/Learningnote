@@ -1,0 +1,63 @@
+<!--BrandMapper.xml-->
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sza.mapper.BrandMapper">
+
+    <!--
+        将数据表的column与Brand类不对应的属性 一一对应起来
+        id唯一标识
+        type映射类型，支持别名
+    -->
+    <resultMap id="brandResultMap" type="com.sza.jojo.Brand">
+        <!--
+            id: 完成主键字段的映射
+            <id column="id" property="id"/>
+            result：完成一半字段的映射
+              <result column="brand_name" property="brandName"/>
+
+        -->
+
+        <result column="brand_name" property="brandName"/>
+        <result column="company_name" property="companyName"/>
+    </resultMap>
+    <!--  这里不再使用resultType，而是使用resultMap  -->
+    <select id="selectAll" resultMap="brandResultMap">
+        select *
+        from tb_brand;
+    </select>
+
+    <select id="selectById" resultMap="brandResultMap">
+        select *
+        from tb_brand
+        where id = #{id}
+    </select>
+
+
+    <!--    #{xxx} 中的xxx尽量与类中的属性保持一致，会省去很多麻烦  -->
+    <select id="selectByCondition" resultMap="brandResultMap">
+        select *
+        from tb_brand
+        where status = #{status}
+          and company_name like concat('%', #{companyName}, '%')
+          and brand_name like concat('%', #{brandName}, '%')
+    </select>
+
+    <select id="selectByDynamicCondition" resultMap="brandResultMap">
+        select *
+        from tb_brand
+        <where>
+            <if test="status != null">
+                status = #{status}
+            </if>
+            <if test="companyName != null and companyName != '' ">
+                and company_name like concat('%',#{companyName},'%')
+            </if>
+            <if test="brandName != null and brandName != '' ">
+                and brand_name like concat('%',#{brandName},'%')
+            </if>
+        </where>
+    </select>
+
+</mapper>

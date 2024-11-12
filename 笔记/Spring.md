@@ -1,3 +1,904 @@
+# MyBatis
+
+MyBatis是一款优秀的持久型（JavaEE三层架构：表现层、业务层和持久层/数据访问层）框架，它支持自定义SQL、存储过程以及高级映射。MyBatis免除了几乎所有的JDBC代码以及设置参数和获取结果集的工作。MyBatis可以通过简单的XML或注解来配置和映射原始类型、接口和Java POJO（Plain Old Java Objects，普通老式Java对象）为数据库中的记录。
+
+![image-20241111201140000](./Spring.assets/image-20241111201140000.png)
+ ## MyBatis快速入门
+
+### 创建user表，添加数据
+
+```sql
+create database mybatisDb; 
+use mybatisDb;
+drop table if exists tb_user;
+create table tb_user( 
+	id int primary key auto_increment, 
+	username varchar(20), 
+	password varchar(20), 
+	gender char(1), 
+	addr varchar(30) 
+); 
+
+INSERT INTO tb_user VALUES (1,'zhangsan','123','男','北京'); 
+INSERT INTO tb_user VALUES (2,'李四','234','女','天津'); 
+INSERT INTO tb_user VALUES (3,'王五','11','男','西安');
+```
+
+### 创建模块，导入坐标
+
+通过maven创建java项目，pom.xml导入依赖：
+
+```xml 
+    <dependencies>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.9</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.28</version>
+        </dependency>
+    </dependencies>
+```
+
+### 编写MyBatis核心配置文件，--> 替换连接信息，解决硬编码问题
+
+<img src="./Spring.assets/image-20241111210957641.png" alt="image-20241111210957641" style="zoom: 50%;" />
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <!-- 数据库连接信息-->
+                <!--
+                MySQL 8.0 以上 com.mysql.jdbc.Driver 更换为 com.mysql.cj.jdbc.Driver
+                -->
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <!--
+                    mybatisDb是数据库名称
+                    jdbc:mysql:// 是连接协议
+                    在 xml 中 & 符合要转义成 &amp; 符号
+                    MySQL 8.0 以上版本不需要建立 SSL 连接的，需要显示关闭。
+                    allowPublicKeyRetrieval=true 允许客户端从服务器获取公钥。
+                    最后还需要设置 CST(也就是设置时区)。
+                -->
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatisDB?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC"/>
+                <property name="username" value="root"/>
+                <property name="password" value="xxxx"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <!--
+        加载映射文件。
+        映射文件即SQL映射文件，该文件中配置了操作数据库的SQL语句，需要在MyBatis配置文件mybatis-config.xml中加载。
+        mybatis-config.xml 文件可以加载多个映射文件，每个文件对应数据库中的一张表。
+				一般会有个规范写法，操作User表就是 UserMapper.xml
+        -->
+        <mapper resource="mapper/UserMapper.xml"/>
+    </mappers>
+</configuration>
+```
+
+#### 创建 Mapper XML 文件
+
+sql语句将通过namespace.sqlId获得sql语句。
+
+```xml
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- UserMapper.xml -->
+<!-- namespace 名称空间 通过namespace.sqlId获得sql语句 -->
+<!-- com.sza.mapper.UserMapper.selectAll-->
+<mapper namespace="com.sza.mapper.UserMapper">
+    <!--  resultType指向封装的java类  -->
+    <select id="selectAll" resultType="com.sza.jojo.User">
+        SELECT * FROM tb_user;
+    </select>
+</mapper>
+```
+
+Mapper XML文件，通常存放在项目的classpath下的一个目录中，例如`resources/mapper/UserMapper.xml`。在上述示例中，我们定义了一个名为`selectAll`的查询操作，并将结果映射到`com.sza.pojo.User`类型（封装数据表的数据）的对象中。
+
+#### 配置 MyBatis
+
+要使用Mapper XML文件，需要在MyBatis的配置文件中引入它们。MyBatis的配置文件通常是mybatis-config.xml，您需要在其中配置Mapper XML文件的路径。
+
+```xml
+<!-- mybatis-config.xml -->
+<configuration>
+    <mappers>
+        <mapper resource="mapper/UserMapper.xml"/>
+    </mappers>
+</configuration>
+```
+
+在上述配置中，我们使用`<mappers>`元素引入了Mapper XML文件，使用`<mapper>`元素的`resource`属性指定了XML文件的路径。
+
+### 编码
+
+### 定义POJO类
+
+```java
+package com.sza.jojo;
+
+public class User {
+    private Integer id;
+    private String username;
+    private String password;
+    private String gender;
+    private String address;
+
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", gender='" + gender + '\'' +
+                ", address='" + address + '\'' +
+                '}';
+    }
+}
+```
+
+ ### 加载核心配置文件，获取sqlSessionFactory对象，执行sql语句
+
+```java
+package com.sza;
+
+import com.sza.jojo.User;
+import org.apache.ibatis.io.Resources;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.session.SqlSessionFactoryBuilder;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
+public class MybatisDemo {
+    public static void main(String[] args) throws IOException {
+
+        // 1.加载mybatis的核心配置文件，获取sqlSessionFactory
+        String resource = "mybatis-config.xml";
+        InputStream inputStream = Resources.getResourceAsStream(resource);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+        // 2.获取sqlSession对象，用它来执行sql
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+
+        // 3.执行sql
+        List<User> users = sqlSession.selectList("com.sza.mapper.UserMapper.selectAll");
+        System.out.println(users);
+
+        // 4.释放资源
+        sqlSession.close();
+
+    }
+}
+```
+
+## 解决SQL映射文件的警告提示
+
+产生原因：idea没和数据库建立连接，不识别表信息
+
+解决方式：在idea中配置MySQL数据库连接
+
+ ![image-20241112101828715](./Spring.assets/image-20241112101828715.png)
+## Mapper代理开发
+
+![image-20241112102037616](./Spring.assets/image-20241112102037616.png)
+
+- 定义与SQL映射文件同名的Mapper接口，并且将Mapper接口与SQL映射文件放置在同一目录下
+
+<img src="./Spring.assets/image-20241112103024682.png" alt="image-20241112103024682" style="zoom:75%;" />
+虽然在idea上配置文件和源代码是分离的，但编译过后`resources`和`java`两个是在一起的。
+
+使用maven的compile编译一下：
+
+![image-20241112103252060](./Spring.assets/image-20241112103252060.png)
+因此：我们在`java`目录下和`resources`下创建相同的路径，最后编译就会在同一目录下：
+
+![image-20241112103912680](./Spring.assets/image-20241112103912680.png)
+
+- 设置SQL映射文件的namespace属性为Mapper接口全限定名
+
+```xml
+<!-- 设置配置文件的namespace为对应接口全限定名-->
+<mapper namespace="com.sza.mapper.UserMapper">
+    <!--  resultType指向封装的java类  -->
+    <select id="selectAll" resultType="com.sza.jojo.User">
+        SELECT * FROM tb_user;
+    </select>
+</mapper>
+```
+
+- 在Mapper接口中定义方法，方法名就是SQL映射文件中sql语句的id，并保持参数类型和返回值类型一致
+
+```java
+public interface UserMapper {
+    List<User> selectAll();
+}
+```
+
+- 编码：通过SqlSession的getMapper方法获取Mapper接口的代理对象，调用对应方法完成sql的执行
+
+```java
+         // 3.1 获取UserMapper接口的代理对象
+        UserMapper userMapper = sqlSession.getMapper(UserMapper.class);
+        List<User> users = userMapper.selectAll();
+        System.out.println(users);
+```
+
+- 此外。如果Mapper接口名称和SQL映射文件名称相同，并且在同一目录下，则可以使用包扫描的方式简化SQL映射文件的加载。
+
+```xml
+    <mappers>
+        <!--
+        加载映射文件。
+        映射文件即SQL映射文件，该文件中配置了操作数据库的SQL语句，需要在MyBatis配置文件mybatis-config.xml中加载。
+        mybatis-config.xml 文件可以加载多个映射文件，每个文件对应数据库中的一张表。
+
+        -->
+        <!--        <mapper resource="com/sza/mapper/UserMapper.xml"/>-->
+        <!-- 使用包扫描的方式 -->
+        <package name="com.sza.mapper"/>
+    </mappers>
+```
+
+## Mybatis核心配置文件
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+<!--
+environments：配置数据库连接环境信息
+可以配置多个environment，通过default属性切换不同的environment 例如不同的数据源
+-->
+    <environments default="development">
+        <environment id="development">
+<!--    transactionManager（事务管理器）-->
+            <transactionManager type="JDBC"/>
+<!--    dataSource（数据源）-->
+            <dataSource type="POOLED">
+                <!-- 数据库连接信息-->
+                <!--
+                MySQL 8.0 以上 com.mysql.jdbc.Driver 更换为 com.mysql.cj.jdbc.Driver
+                -->
+                <property name="driver" value="com.mysql.cj.jdbc.Driver"/>
+                <!--
+                    mybatisDb是数据库名称
+                    jdbc:mysql:// 是连接协议
+                    在 xml 中 & 符合要转义成 &amp; 符号
+                    MySQL 8.0 以上版本不需要建立 SSL 连接的，需要显示关闭。
+                    allowPublicKeyRetrieval=true 允许客户端从服务器获取公钥。
+                    最后还需要设置 CST(也就是设置时区)。
+                -->
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatisDb?useSSL=false&amp;allowPublicKeyRetrieval=true&amp;serverTimezone=UTC"/>
+                <property name="username" value="root"/>
+                <property name="password" value="sunZIANG0415!"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <!--
+        加载映射文件。
+        映射文件即SQL映射文件，该文件中配置了操作数据库的SQL语句，需要在MyBatis配置文件mybatis-config.xml中加载。
+        mybatis-config.xml 文件可以加载多个映射文件，每个文件对应数据库中的一张表。
+
+        -->
+        <!--        <mapper resource="com/sza/mapper/UserMapper.xml"/>-->
+        <!-- 使用包扫描的方式 -->
+        <package name="com.sza.mapper"/>
+    </mappers>
+    
+</configuration>
+```
+
+## Mybatis案例实操
+
+### 数据准备
+
+数据库表：
+
+```sql
+use mybatisDb;  
+drop table if exists tb_brand;  
+create table tb_brand( 
+id int primary key auto_increment,  
+brand_name varchar(20),  company_name varchar(20),  
+orderd int,  
+description varchar(100),  
+status int  );  
+insert into tb_brand(brand_name, company_name, orderd, description, status) VALUES('三只松鼠','三只松鼠有限',5,'好好',0), ('asd','asda',100,'sdasd',1); 
+select *from tb_brand;
+```
+
+实体类：
+
+```java
+package com.sza.jojo;
+
+public class Brand {
+    private Integer id;
+    private String BrandName;
+    private String companyName;
+    private Integer ordered;
+    private String description;
+    private Integer status;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getBrandName() {
+        return BrandName;
+    }
+
+    public void setBrandName(String brandName) {
+        BrandName = brandName;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public Integer getOrdered() {
+        return ordered;
+    }
+
+    public void setOrdered(Integer ordered) {
+        this.ordered = ordered;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    @Override
+    public String toString() {
+        return "Brand{" +
+                "id=" + id +
+                ", BrandName='" + BrandName + '\'' +
+                ", companyName='" + companyName + '\'' +
+                ", ordered=" + ordered +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                '}';
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+}
+```
+
+安装插件MybatisX：配置文件和源文件会有对应
+
+![image-20241112112849216](./Spring.assets/image-20241112112849216.png)
+
+### 功能实现
+
+#### 查询：查询所有数据
+
+- 编写接口方法：Mapper接口
+
+```java
+package com.sza.mapper;
+
+import com.sza.jojo.Brand;
+
+import java.util.List;
+
+public interface BrandMapper {
+    List<Brand> selectAll();
+}
+```
+
+- 参数：无
+- 结果：List<Brand> 
+
+- 编写sql语句：sql映射文件
+
+```java
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sza.mapper.BrandMapper">
+
+    <select id="selectAll" resultType="com.sza.jojo.Brand">
+        select *
+        from tb_brand;
+    </select>
+</mapper>
+```
+
+- 执行方法，测试
+
+```java
+public class MybatisTest {
+    @Test
+    public void testSelectAll() throws IOException {
+        // 1.加载mybatis的核心配置文件，获取sqlSessionFactory
+        String resource = "mybatis-config.xml";
+        InputStream inputStream = Resources.getResourceAsStream(resource);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+
+        // 2.获取sqlSession对象，用它来执行sql
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+
+        // 3.1 获取BrandMapper接口的代理对象
+        BrandMapper mapper = sqlSession.getMapper(BrandMapper.class);
+        List<Brand> brands = mapper.selectAll();
+        System.out.println(brands);
+        // 4.释放资源
+        sqlSession.close();
+    }
+}
+```
+
+![image-20241112150218288](./Spring.assets/image-20241112150218288.png)
+我们发现BrandName和companyName的值都为null
+
+- 数据表的column和封装类的属性对应不上：
+
+  ![image-20241112150248458](./Spring.assets/image-20241112150248458.png)
+  我们发现Brand类的BrandName和companyName和数据表中的字段brand_name和company_name对应不上，因此无法自动装填。
+
+  使用`resultMap`对不一致的进行映射：
+
+  ```xml
+  <!--BrandMapper.xml-->
+  <!DOCTYPE mapper
+          PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"
+          "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.sza.mapper.BrandMapper">
+  
+  <!--
+      将数据表的column与Brand类不对应的属性 一一对应起来
+      id唯一标识
+      type映射类型，支持别名
+  -->
+      <resultMap id="brandResultMap" type="com.sza.jojo.Brand">
+  <!--
+      id: 完成主键字段的映射
+      <id column="id" property="id"/>
+      result：完成一半字段的映射
+        <result column="brand_name" property="brandName"/>
+  
+  -->
+  
+          <result column="brand_name" property="brandName"/>
+          <result column="company_name" property="companyName"/>
+      </resultMap>
+  <!--  这里不再使用resultType，而是使用resultMap  -->
+      <select id="selectAll" resultMap="brandResultMap">
+          select *
+          from tb_brand;
+      </select>
+  </mapper>
+  ```
+
+  再次运行结果：
+
+  ![image-20241112151419110](./Spring.assets/image-20241112151419110.png)
+
+#### 查询：查询详情
+
+- 编写接口方法：Mapper方法
+
+```java
+public interface BrandMapper {
+    List<Brand> selectAll();
+
+    Brand selectById(int id);
+}
+```
+
+- 参数 ：id
+- 结果：Brand
+- 编写SQL语句
+
+```java
+<!--
+    参数占位符：
+    1. #{}: 会将这个地方替换为? 防止sql注入
+    2. ${}: 会拼接sql语句  会存在sql注入问题
+-->
+		<select id="selectById" resultMap="brandResultMap">
+        select *
+        from tb_brand where id = #{id}
+    </select>
+```
+
+- 执行方法，测试
+
+```java
+    @Test
+    public void testSelectById() throws IOException {
+        // 1.加载mybatis的核心配置文件，获取sqlSessionFactory
+        String resource = "mybatis-config.xml";
+        InputStream inputStream = Resources.getResourceAsStream(resource);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+
+        // 2.获取sqlSession对象，用它来执行sql
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+
+        // 3.1 获取BrandMapper接口的代理对象
+        BrandMapper mapper = sqlSession.getMapper(BrandMapper.class);
+        int id = 1;
+        Brand brand = mapper.selectById(id);
+        System.out.println(brand);
+        // 4.释放资源
+        sqlSession.close();
+    }
+```
+
+#### 查询：多条件查询
+
+![image-20241112170308045](./Spring.assets/image-20241112170308045.png)
+
+- 编写接口方法 ：Mapper接口
+
+```java
+//    @Param("xxx") 是为了匹配 sql语句中#{xxx}的占位符
+    List<Brand> selectByCondition(@Param("status")int status,@Param("companyName")String companyName,@Param("brandName")String brandName);
+```
+
+```java
+//  如果参数都属于同一个对象，那么其实可以封装成一个对象作为参数  那么sql语句中 #{xxx} 就会去找该对象中的属性
+    List<Brand> selectByCondition(Brand brand);
+```
+
+```java
+//  当然也可以传入键值对 sql语句中的#{xxx}就会找map中对应的key
+    List<Brand> selectByCondition(Map map);
+```
+
+- 参数：多个参数
+- 结果List<Brand>
+- 编写SQL语句
+
+在 SQL 中，`||`是一个字符串连接运算符。它用于将两个或多个字符串连接在一起，形成一个新的字符串。例如，在查询语句`select 'abc' || 'def';`中，结果将是`abcdef`，即将`'abc'`和`'def'`这两个字符串连接起来。
+
+在 MySQL 中，字符串连接运算符是`CONCAT()`函数，而不是`||`。例如，在 MySQL 中上述的字符串连接操作可以写成`CONCAT(#{companyName}, '%')`
+
+```xml
+<!--    #{xxx} 中的xxx尽量与类中的属性保持一致，会省去很多麻烦  -->
+    <select id="selectByCondition" resultMap="brandResultMap">
+        select *
+        from tb_brand
+        where status= #{status}
+        and company_name like concat('%',#{companyName},'%')
+        and brand_name like concat('%',#{brandName},'%')
+    </select>
+```
+
+- 执行方法，测试
+
+散装参数，方法中有多个参数，需要使用@Param("SQL参数占位符")
+
+```java
+//    @Param("xxx") 是为了匹配 sql语句中#{xxx}的占位符
+    List<Brand> selectByCondition(@Param("status")int status,@Param("companyName")String companyName,@Param("brandName")String brandName);
+```
+
+```java
+    @Test
+    public void testSelectByCondition() throws IOException {
+        int status = 1;
+        String conpanyName = "三只";
+        String brandName = "松鼠";
+
+        // 1.加载mybatis的核心配置文件，获取sqlSessionFactory
+        String resource = "mybatis-config.xml";
+        InputStream inputStream = Resources.getResourceAsStream(resource);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+
+        // 2.获取sqlSession对象，用它来执行sql
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+
+        // 3.1 获取BrandMapper接口的代理对象
+        BrandMapper mapper = sqlSession.getMapper(BrandMapper.class);
+        List<Brand> brands = mapper.selectByCondition(status, conpanyName, brandName);
+        System.out.println(brands);
+        // 4.释放资源
+        sqlSession.close();
+    }
+```
+
+对象参数：
+
+```java
+//  如果参数都属于同一个对象，那么其实可以封装成一个对象作为参数  那么sql语句中 #{xxx} 就会去找该对象中的属性
+    List<Brand> selectByCondition(Brand brand);
+```
+
+```java
+@Test
+    public void testSelectByCondition() throws IOException {
+        int status = 1;
+        String conpanyName = "三只";
+        String brandName = "松鼠";
+
+        Brand brand = new Brand();
+        brand.setBrandName(brandName);
+        brand.setStatus(status);
+        brand.setCompanyName(conpanyName);
+
+        // 1.加载mybatis的核心配置文件，获取sqlSessionFactory
+        String resource = "mybatis-config.xml";
+        InputStream inputStream = Resources.getResourceAsStream(resource);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+
+        // 2.获取sqlSession对象，用它来执行sql
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+
+        // 3.1 获取BrandMapper接口的代理对象
+        BrandMapper mapper = sqlSession.getMapper(BrandMapper.class);
+//        List<Brand> brands = mapper.selectByCondition(status, conpanyName, brandName);
+        List<Brand> brands = mapper.selectByCondition(brand);
+        System.out.println(brands);
+        // 4.释放资源
+        sqlSession.close();
+    }
+```
+
+map集合参数：
+
+```java
+//  当然也可以传入键值对 sql语句中的#{xxx}就会找map中对应的key
+    List<Brand> selectByCondition(Map map);
+```
+
+```java
+@Test
+    public void testSelectByCondition() throws IOException {
+        int status = 1;
+        String conpanyName = "三只";
+        String brandName = "松鼠";
+
+//        Brand brand = new Brand();
+//        brand.setBrandName(brandName);
+//        brand.setStatus(status);
+//        brand.setCompanyName(conpanyName);
+
+        Map map = new HashMap();
+        map.put("status", status);
+        map.put("companyName", conpanyName);
+        map.put("brandName", brandName);
+
+        // 1.加载mybatis的核心配置文件，获取sqlSessionFactory
+        String resource = "mybatis-config.xml";
+        InputStream inputStream = Resources.getResourceAsStream(resource);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+
+        // 2.获取sqlSession对象，用它来执行sql
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+
+        // 3.1 获取BrandMapper接口的代理对象
+        BrandMapper mapper = sqlSession.getMapper(BrandMapper.class);
+//        List<Brand> brands = mapper.selectByCondition(status, conpanyName, brandName);
+//        List<Brand> brands = mapper.selectByCondition(brand);
+        List<Brand> brands = mapper.selectByCondition(map);
+        System.out.println(brands);
+        // 4.释放资源
+        sqlSession.close();
+    }
+```
+
+#### 查询：动态条件查询
+
+SQL语句会随着用户的输入或外部条件的变化而变化，我们称为<font color=yellow>动态SQL</font>。
+
+动态SQL是MyBatis的强大特性之一：
+
+- `if`：使用动态 SQL 最常见情景是根据条件包含 where 子句的一部分
+
+使用`test`进行逻辑判断，其中的变量是类中的属性，而不是数据库的字段。
+
+```xml
+    <select id="selectByCondition" resultMap="brandResultMap">
+        select *
+        from tb_brand
+        where status= #{status}
+        and company_name like concat('%',#{companyName},'%')
+        and brand_name like concat('%',#{brandName},'%')
+    </select>
+```
+
+例如在该where子句中，由三个条件组成，用户可能只勾选其中两个条件进行查询。我们可以使用`if`进行动态添加。
+
+```xml
+    <select id="selectByDynamicCondition" resultMap="brandResultMap">
+        select *
+        from tb_brand
+        where
+        <if test="status != null">
+            status = #{status}
+        </if>
+        <if test="companyName != null and companyName != '' ">  -- 这里判断条件中的变量要是Brand类的属性，不要写成company_name
+            and company_name like concat('%',#{companyName},'%')
+        </if>
+        <if test="brandName != null and brandName != '' ">
+            and brand_name like concat('%',#{brandName},'%')
+        </if>
+    </select>
+```
+
+```java
+// BrandMapper.java 中添加selectByDynamicCondition
+List<Brand> selectByDynamicCondition(Brand brand);
+```
+
+假设我们给 status和companyName属性赋值
+
+```java
+@Test
+    public void testSelectByDynamicCondition() throws IOException {
+        int status = 1;
+        String companyName = "三只";
+        String brandName = "松鼠";
+
+
+        Brand brand = new Brand();
+        brand.setStatus(status);
+        brand.setCompanyName(companyName);
+//        brand.setBrandName(brandName);
+
+        // 1.加载mybatis的核心配置文件，获取sqlSessionFactory
+        String resource = "mybatis-config.xml";
+        InputStream inputStream = Resources.getResourceAsStream(resource);
+        SqlSessionFactory sqlSessionFactory = new SqlSessionFactoryBuilder().build(inputStream);
+
+
+        // 2.获取sqlSession对象，用它来执行sql
+        SqlSession sqlSession = sqlSessionFactory.openSession();
+
+        // 3.1 获取BrandMapper接口的代理对象
+        BrandMapper mapper = sqlSession.getMapper(BrandMapper.class);
+
+        List<Brand> brands = mapper.selectByDynamicCondition(brand);
+        System.out.println(brands);
+        // 4.释放资源
+        sqlSession.close();
+    }
+```
+
+运行会发现生成的sql语句：
+
+![image-20241112211600383](./Spring.assets/image-20241112211600383.png)
+
+说明是有效的，选择了 status = #{status}和 and company_name like concat('%',#{companyName},'%')两个条件进行查询，但是现在出现一个问题：<font color=yellow>如果不选择status这个条件，那么where后接的会有and，如下：</font>
+
+```java
+        Brand brand = new Brand();
+//        brand.setStatus(status);
+        brand.setCompanyName(companyName);
+        brand.setBrandName(brandName);
+```
+
+运行报错：
+
+<img src="./Spring.assets/image-20241112211857620.png" alt="image-20241112211857620" style="zoom:150%;" />
+
+解决办法：使用`<where>`标签替换where关键字，`<whrer>`只会在它包含的标签中有返回值的情况下才插入 “WHERE” 子句。 而且，若子句的开头为 “AND” 或 “OR”，where标签也会将它们去除。
+
+```xml
+    <select id="selectByDynamicCondition" resultMap="brandResultMap">
+        select *
+        from tb_brand
+        <where>
+            <if test="status != null">
+                status = #{status}
+            </if>
+            <if test="companyName != null and companyName != '' ">
+                and company_name like concat('%',#{companyName},'%')
+            </if>
+            <if test="brandName != null and brandName != '' ">
+                and brand_name like concat('%',#{brandName},'%')
+            </if>
+        </where>
+    </select>
+```
+
+![image-20241112212438460](./Spring.assets/image-20241112212438460.png)
+我们发现and被去除了，此外我们如果不设置任何的值：
+
+```java
+        Brand brand = new Brand();
+//        brand.setStatus(status);
+//        brand.setCompanyName(companyName);
+//        brand.setBrandName(brandName);
+```
+
+运行，发现不会插入where子句：
+
+![image-20241112212538086](./Spring.assets/image-20241112212538086.png)
+
+- choose (when, otherwise)
+- trim (where, set)
+- foreach
+
 # Maven
 
 Maven是apache旗下的一个开源项目，是一款用于管理和构建java项目的工具，它基于项目对象模型（POM，project object model）的概念，通过一小段描述信息来guan
@@ -29,8 +930,6 @@ Maven的作用：
 
   - 最关键的一个项目描述文件`pom.xml`，它的内容长得像下面：
 
-  - 
-
   - ```xml
     <project ...>
     	<modelVersion>4.0.0</modelVersion>
@@ -51,7 +950,7 @@ Maven的作用：
     	</dependencies>
     </project>
     ```
-
+  
     其中，`groupId`类似于Java的包名，通常是公司或组织名称，`artifactId`类似于Java的类名，通常是项目名称，再加上`version`，一个Maven工程就是由`groupId`，`artifactId`和`version`作为唯一标识。
 
     我们在引用其他第三方库的时候，也是通过这3个变量确定。例如，依赖`org.slfj4:slf4j-simple:2.0.16`：
@@ -63,16 +962,16 @@ Maven的作用：
         <version>2.0.16</version>
     </dependency>
     ```
-
+  
     使用`<dependency>`声明一个依赖后，Maven就会自动下载这个依赖包并把它放到classpath中。
 
     另外，注意到`<properties>`定义了一些属性，常用的属性有：
 
     - `project.build.sourceEncoding`：表示项目源码的字符编码，通常应设定为`UTF-8`；
-    - `maven.compiler.release`：表示使用的JDK版本，例如`21`；
+  - `maven.compiler.release`：表示使用的JDK版本，例如`21`；
     - `maven.compiler.source`：表示Java编译器读取的源码版本；
     - `maven.compiler.target`：表示Java编译器编译的Class版本。
-
+  
     从Java 9开始，推荐使用`maven.compiler.release`属性，保证编译时输入的源码和编译输出版本一致。如果源码和输出版本不同，则应该分别设置`maven.compiler.source`和`maven.compiler.target`。
 
     通过`<properties>`定义的属性，就可以固定JDK版本，防止同一个项目的不同的开发者各自使用不同版本的JDK。
