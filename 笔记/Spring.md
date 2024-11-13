@@ -1,4 +1,4 @@
-# MyBatis
+#  MyBatis
 
 MyBatis是一款优秀的持久型（JavaEE三层架构：表现层、业务层和持久层/数据访问层）框架，它支持自定义SQL、存储过程以及高级映射。MyBatis免除了几乎所有的JDBC代码以及设置参数和获取结果集的工作。MyBatis可以通过简单的XML或注解来配置和映射原始类型、接口和Java POJO（Plain Old Java Objects，普通老式Java对象）为数据库中的记录。
 
@@ -895,9 +895,88 @@ List<Brand> selectByDynamicCondition(Brand brand);
 
 ![image-20241112212538086](./Spring.assets/image-20241112212538086.png)
 
-- choose (when, otherwise)
+- choose (when, otherwise) 选择 ，类似于Java中的switch语句，从多个条件中选择一个
+
+```xml
+    <select id="selectByConditionSingle" resultMap="brandResultMap">
+        select *
+        from tb_brand
+        <where>
+            <choose>
+                <when test="status != null">
+                    status = #{status}
+                </when>
+                <when test="companyName != null and companyName != '' ">
+                    company_name like concat('%',#{companyName},'%')
+                </when>
+                <when test="brandName != null and brandName != '' ">
+                    brand_name like concat('%',#{brandName},'%')
+                </when>
+                <otherwise>
+                    1 = 1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+```
+
+`choose`相当于switch，`when`类似于case，`otherwise`类似于default。
+
 - trim (where, set)
 - foreach
+
+####  添加
+
+```xml
+    <insert id="addBrand">
+        INSERT into tb_brand (brand_name,company_name,ordered,description,status)
+        VALUES (#{brandName},#{companyName},#{ordered},#{description},#{status})
+    </insert>
+```
+
+需要执行sql语句后提交事务：
+
+```java
+       BrandMapper mapper = sqlSession.getMapper(BrandMapper.class);
+
+        mapper.addBrand(brand);
+        // 提交事务
+        sqlSession.commit();
+```
+
+Mybatis事务，可以在openSession默认开启事务：
+
+```java
+        SqlSession sqlSession = sqlSessionFactory.openSession(true);
+```
+
+##### 主键返回
+
+当我们添加东西，想要返回其主键id值：
+
+```java
+				mapper.addBrand(brand);
+        // 提交事务
+        sqlSession.commit();
+        System.out.println(brand.getId()); // null
+```
+
+打印为null，及时数据库中添加了该数据
+
+```xml
+   <insert id="addBrand" useGeneratedKeys="true" keyProperty="id">
+        INSERT into tb_brand (brand_name,company_name,ordered,description,status)
+        VALUES (#{brandName},#{companyName},#{ordered},#{description},#{status})
+    </insert>
+```
+
+添加useGeneratedKeys="true" keyProperty="id" id 为tb_brand的主键，添加该命令，返回添加数据的主键。再此添加，就会打印出添加的id。
+
+#### 修改
+
+
+
+
 
 # Maven
 

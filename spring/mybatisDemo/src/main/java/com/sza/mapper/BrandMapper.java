@@ -22,4 +22,8 @@ public interface BrandMapper {
 
     List<Brand> selectByDynamicCondition(Brand brand);
 
+    List<Brand> selectByConditionSingle(Brand brand);
+
+    void addBrand(Brand brand);
+
 }

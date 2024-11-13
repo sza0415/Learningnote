@@ -22,6 +22,7 @@
         <result column="brand_name" property="brandName"/>
         <result column="company_name" property="companyName"/>
     </resultMap>
+
     <!--  这里不再使用resultType，而是使用resultMap  -->
     <select id="selectAll" resultMap="brandResultMap">
         select *
@@ -59,5 +60,32 @@
             </if>
         </where>
     </select>
+    <select id="selectByConditionSingle" resultMap="brandResultMap">
+        select *
+        from tb_brand
+        <where>
+            <choose>
+                <when test="status != null">
+                    status = #{status}
+                </when>
+                <when test="companyName != null and companyName != '' ">
+                    company_name like concat('%',#{companyName},'%')
+                </when>
+                <when test="brandName != null and brandName != '' ">
+                    brand_name like concat('%',#{brandName},'%')
+                </when>
+                <otherwise>
+                    1 = 1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+
+
+    <insert id="addBrand" useGeneratedKeys="true" keyProperty="id">
+        INSERT into tb_brand (brand_name,company_name,ordered,description,status)
+        VALUES (#{brandName},#{companyName},#{ordered},#{description},#{status})
+    </insert>
 
 </mapper>
