@@ -15,7 +15,7 @@ The purpose of the `ARSessionOrigin` is to transform trackable features (such as
 Parented to the `ARSessionOrigin`'s' `GameObject` should be (at least) one camera, which will be used to render any trackables you wish to visualize. The camera should also have a `TrackedPoseDriver` component on it, which will drive the camera's local position and rotation according to the device's tracking information. This setup allows the camera's local space to match the AR "session space".
 
 
-# ARFoundation之路－图像跟踪
+# ARFoundation－图像跟踪
 
 https://blog.csdn.net/yolon3000/article/details/96502120
 
@@ -84,7 +84,7 @@ Max Number of Moving Images属性指定了最大的可跟踪的动态图像数�
 
 经过测试，我们发现在ARFoundation中，AR Tracked Image Manager组件在trackedImagesChanged事件触发之前就已经实例化了虚拟对象。
 
-> 这里直接看官网给的解释，也会方便我们后续的理解：
+> 直接看官网给的解释，也会方便我们后续的理解：
 >
 > ## Tracked Image Prefab
 >
@@ -332,11 +332,25 @@ ARTrackedImage GetImageAt(TrackableId trackableId)
     
     ![img](./ARFoundationLearning.assets/0798c75c9e2f80e0554f7c7cbc93bb95.png)
     
+    
+    
     `added` 参数是一个列表，其中包含了自上一帧以来新添加的可跟踪对象 。这些对象是在当前帧中被 AR 系统检测到并添加到跟踪列表中的。
     
     `updated` 列表包含了自上一帧以来发生了更新的可跟踪对象。这些对象已经被 AR 系统跟踪，并且在当前帧中其某些属性或状态发生了变化，例如位置、旋转、缩放等。
     
     `removed` 列表则包含了自上一帧以来被移除的可跟踪对象，即这些对象在上一帧还在被跟踪，但在当前帧中由于某种原因不再被 AR 系统跟踪，例如超出了跟踪范围、被遮挡时间过长等。
+    
+    ![image-20241115142916837](./ARFoundationLearning.assets/image-20241115142916837.png)
+    
+    Tracking State
+    
+    There are three possible tracking states for `ARTrackedImages`:
+    
+    |                        TrackingState                         | Description                                                  |
+    | :----------------------------------------------------------: | :----------------------------------------------------------- |
+    | [None](https://docs.unity3d.com/Packages/com.unity.xr.arsubsystems@4.0/api/UnityEngine.XR.ARSubsystems.TrackingState.html#UnityEngine_XR_ARSubsystems_TrackingState_None) | The image is not being tracked. Note that this may be the initial state when the image is first detected. |
+    | [Limited](https://docs.unity3d.com/Packages/com.unity.xr.arsubsystems@4.0/api/UnityEngine.XR.ARSubsystems.TrackingState.html#UnityEngine_XR_ARSubsystems_TrackingState_Limited) | The image is being tracked, but not as well. The situations in which an image is considered `Limited` instead of `Tracking` depend on the underlying AR framework. Examples that may cause `Limited` tracking include: Obscuring the image so that it is not visible to the camera.The image is not tracked as a moving image. This can happen, for example, if the `maxNumberOfMovingImages` is exceeded. |
+    | [Tracking](https://docs.unity3d.com/Packages/com.unity.xr.arsubsystems@4.0/api/UnityEngine.XR.ARSubsystems.TrackingState.html#UnityEngine_XR_ARSubsystems_TrackingState_Tracking) | The underlying AR SDK reports that it is actively tracking the image. |
   
 - Events
 
@@ -360,4 +374,10 @@ ARTrackedImage GetImageAt(TrackableId trackableId)
 ​	
 
 
+
+
+
+![image-20241115142640377](./ARFoundationLearning.assets/image-20241115142640377.png)
+
+https://github.com/Unity-Technologies/arfoundation-samples/issues/365
 
