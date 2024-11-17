@@ -10,7 +10,7 @@
         id唯一标识
         type映射类型，支持别名
     -->
-    <resultMap id="brandResultMap" type="com.sza.jojo.Brand">
+    <resultMap id="brandResultMap" type="com.sza.pojo.Brand">
         <!--
             id: 完成主键字段的映射
             <id column="id" property="id"/>

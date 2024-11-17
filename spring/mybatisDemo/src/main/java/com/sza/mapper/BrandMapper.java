@@ -1,10 +1,8 @@
 package com.sza.mapper;
 
-import com.sza.jojo.Brand;
-import org.apache.ibatis.annotations.Param;
+import com.sza.pojo.Brand;
 
 import java.util.List;
-import java.util.Map;
 
 public interface BrandMapper {
     List<Brand> selectAll();

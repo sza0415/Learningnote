@@ -1,6 +1,6 @@
 package com.sza;
 
-import com.sza.jojo.User;
+import com.sza.pojo.User;
 import com.sza.mapper.UserMapper;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;

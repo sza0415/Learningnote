@@ -4,7 +4,7 @@
 
 <mapper namespace="com.sza.mapper.UserMapper">
     <!--  resultType指向封装的java类  -->
-    <select id="selectAll" resultType="com.sza.jojo.User">
+    <select id="selectAll" resultType="com.sza.pojo.User">
         SELECT * FROM tb_user;
     </select>
 </mapper>

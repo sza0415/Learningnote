@@ -1,0 +1,10 @@
+<!--<!DOCTYPE mapper-->
+<!--        PUBLIC "-//mybatis.org//DTD mapper 3.0//EN"-->
+<!--        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">-->
+
+<!--<mapper namespace="com.sza.mapper.UserMapper">-->
+<!--    &lt;!&ndash;  resultType指向封装的java类  &ndash;&gt;-->
+<!--    <select id="selectAll" resultType="com.sza.pojo.User">-->
+<!--        SELECT * FROM tb_user;-->
+<!--    </select>-->
+<!--</mapper>-->

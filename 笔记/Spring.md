@@ -102,7 +102,7 @@ sql语句将通过namespace.sqlId获得sql语句。
 <!-- com.sza.mapper.UserMapper.selectAll-->
 <mapper namespace="com.sza.mapper.UserMapper">
     <!--  resultType指向封装的java类  -->
-    <select id="selectAll" resultType="com.sza.jojo.User">
+    <select id="selectAll" resultType="com.sza.pojo.User">
         SELECT * FROM tb_user;
     </select>
 </mapper>
@@ -130,7 +130,7 @@ Mapper XML文件，通常存放在项目的classpath下的一个目录中，例�
 ### 定义POJO类
 
 ```java
-package com.sza.jojo;
+package com.sza.pojo;
 
 public class User {
     private Integer id;
@@ -198,7 +198,7 @@ public class User {
 ```java
 package com.sza;
 
-import com.sza.jojo.User;
+import com.sza.pojo.User;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -259,7 +259,7 @@ public class MybatisDemo {
 <!-- 设置配置文件的namespace为对应接口全限定名-->
 <mapper namespace="com.sza.mapper.UserMapper">
     <!--  resultType指向封装的java类  -->
-    <select id="selectAll" resultType="com.sza.jojo.User">
+    <select id="selectAll" resultType="com.sza.pojo.User">
         SELECT * FROM tb_user;
     </select>
 </mapper>
@@ -372,7 +372,7 @@ select *from tb_brand;
 实体类：
 
 ```java
-package com.sza.jojo;
+package com.sza.pojo;
 
 public class Brand {
     private Integer id;
@@ -458,7 +458,7 @@ public class Brand {
 ```java
 package com.sza.mapper;
 
-import com.sza.jojo.Brand;
+import com.sza.pojo.Brand;
 
 import java.util.List;
 
@@ -479,7 +479,7 @@ public interface BrandMapper {
 
 <mapper namespace="com.sza.mapper.BrandMapper">
 
-    <select id="selectAll" resultType="com.sza.jojo.Brand">
+    <select id="selectAll" resultType="com.sza.pojo.Brand">
         select *
         from tb_brand;
     </select>
@@ -534,7 +534,7 @@ public class MybatisTest {
       id唯一标识
       type映射类型，支持别名
   -->
-      <resultMap id="brandResultMap" type="com.sza.jojo.Brand">
+      <resultMap id="brandResultMap" type="com.sza.pojo.Brand">
   <!--
       id: 完成主键字段的映射
       <id column="id" property="id"/>
@@ -976,7 +976,7 @@ Mybatis事务，可以在openSession默认开启事务：
 
 
 
-
+![image-20241117144429821](./Spring.assets/image-20241117144429821.png)
 
 # Maven
 
@@ -2623,3 +2623,786 @@ public class SpringConfig {
 - `@Configuration`标识该类为配置类，使用类替换`applicationContext.xml`文件
 - `ClassPathXmlApplicationContext`是加载XML配置文件
 - `AnnotationConfigApplicationContext`是加载配置类
+
+### 注解开发bean的作用范围和生命周期
+
+使用注解已经完成了bean的管理，接下来按照前面所学习的内容，将通过配置实现的内容都换成对应的注解实现，包含两部分内容:`bean作用范围(scope)`和`bean生命周期(init和destroy)`
+
+要想将BookDaoImpl变成非单例，只需要在其类上添加`@scope`注解
+
+```java
+@Component("bookDao")
+@Scope("prototype")
+public class BookDaoImpl implements BookDao {
+    public void save() {
+        System.out.println("book dao save ...");
+    }
+}
+```
+
+@scope：
+
+| 名称 |                            @Scope                            |
+| :--: | :----------------------------------------------------------: |
+| 类型 |                            类注解                            |
+| 位置 |                          类定义上方                          |
+| 作用 | 设置该类创建对象的作用范围，可用于设置创建出的bean是否为单例对象 |
+| 属性 | value（默认）：定义bean作用范围，默认值singleton（单例），可选值prototype（非单例） |
+
+#### bean的生命周期
+
+- 在BookDaoImpl中添加两个方法，`init`和`destroy`，方法名可以任意，再添加一个构造方法
+
+```java
+@Component("bookDao")
+public class BookDaoImpl implements BookDao {
+    
+    public BookDaoImpl() {
+        System.out.println("construct ... ");
+    }
+
+    public void save() {
+        System.out.println("book dao save ...");
+    }
+
+    public void init() {
+        System.out.println("init ... ");
+    }
+
+    public void destroy() {
+        System.out.println("destroy ... ");
+    }
+}
+```
+
+如何对方法进行标识，哪个是初始化方法，哪个是销毁方法?
+只需要在对应的方法上添加`@PostConstruct`和`@PreDestroy`注解即可。
+
+```java
+@Component("bookDao")
+public class BookDaoImpl implements BookDao {
+
+    public BookDaoImpl() {
+        System.out.println("construct ... ");
+    }
+
+    public void save() {
+        System.out.println("book dao save ...");
+    }
+
+    @PostConstruct  // 在构造方法之后执行，替换 init-method
+    public void init() {
+        System.out.println("init ... ");
+    }
+
+    @PreDestroy // 在销毁方法之前执行,替换 destroy-method
+    public void destroy() {
+        System.out.println("destroy ... ");
+    }
+}
+```
+
+知识点`@PostConstruct`
+
+| 名称 |     @PostConstruct     |
+| :--: | :--------------------: |
+| 类型 |        方法注解        |
+| 位置 |         方法上         |
+| 作用 | 设置该方法为初始化方法 |
+| 属性 |           无           |
+
+知识点`@PreDestroy`
+
+| 名称 |     @PreDestroy      |
+| :--: | :------------------: |
+| 类型 |       方法注解       |
+| 位置 |        方法上        |
+| 作用 | 设置该方法为销毁方法 |
+| 属性 |          无          |
+
+> 配置文件中的bean标签中的
+> `id`对应`@Component("")`，`@Controller("")`，`@Service("")`，`@Repository("")`
+> `scope`对应`@scope()`
+> `init-method`对应`@PostConstruct`
+> `destroy-method`对应`@PreDestroy`
+
+### 注解开发依赖注入
+
+Spring为了使用注解简化开发，并没有提供`构造函数注入`、`setter注入`对应的注解，只提供了自动装配的注解实现。
+
+#### 注解实现按照类型注入
+
+在BookServiceImpl类的bookDao属性上添加`@Autowired`注解：
+
+```java
+@Service
+public class BookServiceImpl implements BookService {
+    @Autowired
+    private BookDao bookDao;
+
+//    public void setBookDao(BookDao bookDao) {
+//        this.bookDao = bookDao;
+//    }
+
+    public void save() {
+        System.out.println("book service save ...");
+        bookDao.save();
+    }
+}
+```
+
+> **注意:**
+>
+> - `@Autowired`可以写在属性上，也可也写在setter方法上，最简单的处理方式是`写在属性上并将setter方法删除掉`
+> - 为什么setter方法可以删除呢?
+>   - 自动装配基于反射设计创建对象并通过`暴力反射`为私有属性进行设值
+>   - 普通反射只能获取public修饰的内容
+>   - 暴力反射除了获取public修饰的内容还可以获取private修改的内容
+>   - 所以此处无需提供setter方法
+
+`@Autowired`是按照类型注入，那么对应BookDao接口如果有多个实现类，比如添加BookDaoImpl2
+
+```java
+@Repository
+public class BookDaoImpl2 implements BookDao {
+    public void save() {
+        System.out.println("book dao save ...2");
+    }
+}
+```
+
+#### 注解实现按照名称注入
+
+先给两个Dao类分别起个名称
+
+```java
+@Repository("bookDao")
+public class BookDaoImpl implements BookDao {
+    public void save() {
+        System.out.println("book dao save ..." );
+    }
+}
+@Repository("bookDao2")
+public class BookDaoImpl2 implements BookDao {
+    public void save() {
+        System.out.println("book dao save ...2" );
+    }
+}
+```
+
+- 此时就可以注入成功，但是得思考个问题: 
+- @Autowired是按照类型注入的，给BookDao的两个实现起了名称，它还是有两个bean对象，为什么不报错?
+- @Autowired默认按照类型自动装配，如果IOC容器中同类的Bean找到多个，就按照变量名和Bean的名称匹配。因为变量名叫`bookDao`而容器中也有一个`bookDao`，所以可以成功注入。
+
+那下面这种情况可以成功注入吗
+
+```java
+@Repository("bookDao1")
+public class BookDaoImpl implements BookDao {
+    public void save() {
+        System.out.println("book dao save ..." );
+    }
+}
+@Repository("bookDao2")
+public class BookDaoImpl2 implements BookDao {
+    public void save() {
+        System.out.println("book dao save ...2" );
+    }
+}
+```
+
+还是不行的，因为按照类型会找到多个bean对象，此时会按照`bookDao`名称去找，因为IOC容器只有名称叫`bookDao1`和`bookDao2`，所以找不到，会报`NoUniqueBeanDefinitionException`
+
+当根据类型在容器中找到多个bean,注入参数的属性名又和容器中bean的名称不一致，这个时候该如何解决，就需要使用到`@Qualifier`来指定注入哪个名称的bean对象。`@Qualifier`注解后的值就是需要注入的bean的名称。
+
+```java
+@Service
+public class BookServiceImpl implements BookService {
+    @Autowired
+    @Qualifier("bookDao1")
+    private BookDao bookDao;
+    
+    public void save() {
+        System.out.println("book service save ...");
+        bookDao.save();
+    }
+}
+```
+
+注意:@Qualifier不能独立使用，必须和@Autowired一起使用
+
+#### 注解简单数据类型注入
+
+引用类型看完，简单类型注入就比较容易懂了。简单类型注入的是基本数据类型或者字符串类型，下面在`BookDaoImpl`类中添加一个`name`属性，用其进行简单类型注入
+
+```java
+@Repository
+public class BookDaoImpl implements BookDao {
+    private String name;
+    public void save() {
+        System.out.println("book dao save ..." + name);
+    }
+}
+```
+
+数据类型换了，对应的注解也要跟着换，这次使用`@Value`注解，将值写入注解的参数中就行了
+
+```java
+@Repository
+public class BookDaoImpl implements BookDao {
+    @Value("Stephen")
+    private String name;
+    public void save() {
+        System.out.println("book dao save ..." + name);
+    }
+}
+```
+
+注意数据格式要匹配，如将”abc”注入给int值，这样程序就会报错。
+介绍完后，会有一种感觉就是这个注解好像没什么用，跟直接赋值是一个效果，还没有直接赋值简单。
+
+#### 注解读取properties配置文件
+
+`@Value`一般会被用在从properties配置文件中读取内容进行使用，具体如何实现?
+
+- `步骤一：`在resource下准备一个properties文件
+
+  ```properties
+  name=Stephen
+  ```
+
+- `步骤二：`使用注解加载properties配置文件，在配置类上添加`@PropertySource`注解
+
+  ```java
+  @Configuration
+  @ComponentScan("com.blog")
+  @PropertySource("jdbc.properties")
+  public class SpringConfig {
+  }
+  ```
+
+- `步骤三：`使用@Value读取配置文件中的内容
+
+  ```java
+  @Repository
+  public class BookDaoImpl implements BookDao {
+      @Value("${name}")
+      private String name;
+      public void save() {
+          System.out.println("book dao save ..." + name);
+      }
+  }
+  ```
+
+> **注意:**
+>
+> - 如果读取的properties配置文件有多个，可以使用`@PropertySource`的属性来指定多个
+>
+>   ```java
+>   @PropertySource({"jdbc.properties","xxx.properties"})
+>   ```
+>
+> - `@PropertySource`注解属性中不支持使用通配符*,运行会报错
+>
+>   ```java
+>   @PropertySource({"*.properties"}) // 报错
+>   ```
+>
+> - `@PropertySource`注解属性中可以把`classpath:`加上,代表从当前项目的根路径找文件
+>
+>   ```java
+>   @PropertySource({"classpath:jdbc.properties"})
+>   ```
+
+知识点1：`@Autowired`
+
+| 名称 |                          @Autowired                          |
+| :--: | :----------------------------------------------------------: |
+| 类型 |     属性注解 或 方法注解（了解） 或 方法形参注解（了解）     |
+| 位置 | 属性定义上方 或 标准set方法上方 或 类set方法上方 或 方法形参前面 |
+| 作用 |                     为引用类型属性设置值                     |
+| 属性 |        required：true/false，定义该属性是否允许为null        |
+
+知识点2：`@Qualifier`
+
+| 名称 |                    @Qualifier                    |
+| :--: | :----------------------------------------------: |
+| 类型 |           属性注解 或 方法注解（了解）           |
+| 位置 | 属性定义上方 或 标准set方法上方 或 类set方法上方 |
+| 作用 |          为引用类型属性指定注入的beanId          |
+| 属性 |         value（默认）：设置注入的beanId          |
+
+知识点3：`@Value`
+
+| 名称 |                      @Value                      |
+| :--: | :----------------------------------------------: |
+| 类型 |           属性注解 或 方法注解（了解）           |
+| 位置 | 属性定义上方 或 标准set方法上方 或 类set方法上方 |
+| 作用 |     为 基本数据类型 或 字符串类型 属性设置值     |
+| 属性 |          value（默认）：要注入的属性值           |
+
+知识点4：`@PropertySource`
+
+| 名称 |                       @PropertySource                        |
+| :--: | :----------------------------------------------------------: |
+| 类型 |                            类注解                            |
+| 位置 |                          类定义上方                          |
+| 作用 |                 加载properties文件中的属性值                 |
+| 属性 | value（默认）：设置加载的properties文件对应的文件名或文件名组成的数组 |
+
+## IOC/DI注解开发管理第三方bean
+
+前面定义bean的时候都是在自己开发的类上面写个注解就完成了，但如果是第三方的类，这些类都是在jar包中，我们没有办法在类上面添加注解：
+
+遇到上述问题，我们就需要有一种更加灵活的方式来定义bean,这种方式不能在原始代码上面书写注解，一样能定义bean,这就用到了一个全新的注解`@Bean`。
+
+### 注解开发管理第三方bean
+
+在上述环境中完成对`Druid`数据源的管理，具体的实现步骤为
+
+- 步骤一：导入对应的jar包
+
+  ```xml
+  <dependency>
+      <groupId>com.alibaba</groupId>
+      <artifactId>druid</artifactId>
+      <version>1.1.16</version>
+  </dependency>
+  ```
+
+- 步骤二：在配置类中添加一个方法，注意该方法的返回值就是要创建的Bean对象类型
+
+  ```java
+  @Configuration
+  public class SpringConfig {
+      public DataSource dataSource() {
+          DruidDataSource dataSource = new DruidDataSource();
+          dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+          dataSource.setUrl("jdbc:mysql://localhost:13306/spring_db");
+          dataSource.setUsername("root");
+          dataSource.setPassword("PASSWORD");
+          return dataSource;
+      }
+  }
+  ```
+
+- 步骤三：在方法上添加`@Bean`注解，注解的作用是将方法的返回值作为一个Spring管理的bean对象
+
+  ```java
+  @Configuration
+  public class SpringConfig {
+      @Bean
+      public DataSource dataSource() {
+          DruidDataSource dataSource = new DruidDataSource();
+          dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+          dataSource.setUrl("jdbc:mysql://localhost:13306/spring_db");
+          dataSource.setUsername("root");
+          dataSource.setPassword("PASSWORD");
+          return dataSource;
+      }
+  }
+  ```
+
+- 步骤四：从IOC容器中获取对象并打印
+
+  ```java
+  public class App {
+      public static void main(String[] args) {
+          AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(SpringConfig.class);
+          DataSource dataSource = ctx.getBean(DataSource.class);
+          System.out.println(dataSource);
+      }
+  }
+  ```
+
+- 至此使用`@Bean`来管理第三方bean的案例就已经完成。
+- 如果有多个bean要被Spring管理，直接在配置类中多写几个方法，方法上添加@Bean注解即可。
+
+### 引入外部配置类
+
+如果把所有的第三方bean都配置到Spring的配置类`SpringConfig`中，虽然可以，但是不利于代码阅读和分类管理，所有我们就想能不能按照类别将这些bean配置到不同的配置类中?
+
+那么对于数据源的bean，我们可以把它的配置单独放倒一个`JdbcConfig`类中
+
+```java
+public class JdbcConfig {
+    @Bean
+    public DataSource dataSource() {
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://localhost:13306/spring_db");
+        dataSource.setUsername("root");
+        dataSource.setPassword("PASSWORD");
+        return dataSource;
+    }
+}
+```
+
+那现在又有了一个新问题，这个配置类如何能被Spring配置类加载到，并创建DataSource对象在IOC容器中?针对这个问题，有两个解决方案，接着往下看
+
+#### 使用包扫描引入
+
+- `步骤一：`在Spring的配置类上添加包扫描，注意要将JdbcConfig类放在包扫描的地址下
+
+  ```java
+  @Configuration
+  @ComponentScan("com.blog.config")
+  public class SpringConfig {
+  }
+  ```
+
+- `步骤二：`在JdbcConfig上添加`@Configuration`注解
+  JdbcConfig类要放入到`com.blog.config`包下，需要被Spring的配置类扫描到即可
+
+  ```java
+  @Configuration
+  public class JdbcConfig {
+      @Bean
+      public DataSource dataSource(){
+          DruidDataSource ds = new DruidDataSource();
+          ds.setDriverClassName("com.mysql.jdbc.Driver");
+          ds.setUrl("jdbc:mysql://localhost:3306/spring_db");
+          ds.setUsername("root");
+          ds.setPassword("root");
+          return ds;
+      }
+  }
+  ```
+
+#### 使用@Import引入
+
+方案一实现起来有点小复杂，Spring早就想到了这一点，于是又给我们提供了第二种方案。
+这种方案可以不用加`@Configuration`注解，但是必须在Spring配置类上使用`@Import`注解手动引入需要加载的配置类
+
+- `步骤一：`去除JdbcConfig类上的注解
+
+  ```java
+  public class JdbcConfig {
+      @Bean
+      public DataSource dataSource() {
+          DruidDataSource dataSource = new DruidDataSource();
+          dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+          dataSource.setUrl("jdbc:mysql://localhost:13306/spring_db");
+          dataSource.setUsername("root");
+          dataSource.setPassword("PASSWORD");
+          return dataSource;
+      }
+  }
+  ```
+
+- `步骤二：`在Spring配置类中引入
+
+  ```java
+  @Configuration
+  @Import(JdbcConfig.class)
+  public class SpringConfig {
+  }
+  ```
+
+> **注意:**
+>
+> - 扫描注解可以移除
+> - @Import参数需要的是一个数组，可以引入多个配置类。
+> - @Import注解在配置类中只能写一次
+
+知识点1：`@Bean`
+
+| 名称 |                 @Bean                  |
+| :--: | :------------------------------------: |
+| 类型 |                方法注解                |
+| 位置 |              方法定义上方              |
+| 作用 | 设置该方法的返回值作为spring管理的bean |
+| 属性 |      value（默认）：定义bean的id       |
+
+知识点2：`@Import`
+
+| 名称 |                           @Import                            |
+| :--: | :----------------------------------------------------------: |
+| 类型 |                            类注解                            |
+| 位置 |                          类定义上方                          |
+| 作用 |                          导入配置类                          |
+| 属性 | value（默认）：定义导入的配置类类名， 当配置类有多个时使用数组格式一次性导入多个配置类 |
+
+### 注解开发实现为第三方bean注入资源
+
+在使用@Bean创建bean对象的时候，如果方法在创建的过程中需要其他资源该怎么办?
+
+这些资源会有两大类，分别是`简单数据类型` 和`引用数据类型`。
+
+#### 简单数据类型
+
+对于下面代码关于数据库的四要素不应该写死在代码中，应该是从properties配置文件中读取。如何来优化下面的代码?
+
+```java
+public class JdbcConfig {
+    @Bean
+    public DataSource dataSource() {
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        dataSource.setUrl("jdbc:mysql://localhost:13306/spring_db");
+        dataSource.setUsername("root");
+        dataSource.setPassword("PASSWORD");
+        return dataSource;
+    }
+}
+```
+
+- `步骤一：`提供对应的四个属性
+
+  ```java
+  public class JdbcConfig {
+  
+      private String driver;
+      private String url;
+      private String username;
+      private String password;
+  
+      @Bean
+      public DataSource dataSource() {
+          DruidDataSource dataSource = new DruidDataSource();
+          dataSource.setDriverClassName(driver);
+          dataSource.setUrl(url);
+          dataSource.setUsername(username);
+          dataSource.setPassword(password);
+          return dataSource;
+      }
+  }
+  ```
+
+- `步骤二：`使用`@Value`注解
+
+  ```java
+  public class JdbcConfig {
+      @Value("com.mysql.jdbc.Driver")
+      private String driver;
+      @Value("jdbc:mysql://localhost:13306/spring_db")
+      private String url;
+      @Value("root")
+      private String username;
+      @Value("PASSWORD")
+      private String password;
+  
+      @Bean
+      public DataSource dataSource() {
+          DruidDataSource dataSource = new DruidDataSource();
+          dataSource.setDriverClassName(driver);
+          dataSource.setUrl(url);
+          dataSource.setUsername(username);
+          dataSource.setPassword(password);
+          return dataSource;
+      }
+  }
+  ```
+
+- 扩展
+  现在的数据库连接四要素还是写在代码中，需要做的是将这些内容提取到jdbc.properties配置文件，在上面我们已经实现过了，这里再来复习一遍
+
+1. resources目录下添加jdbc.properties
+
+2. 配置文件中提供四个键值对分别是数据库的四要素
+
+   ```properties
+   jdbc.driver=com.mysql.jdbc.Driver
+   jdbc.url=jdbc:mysql://localhost:13306/spring_db
+   jdbc.username=root
+   jdbc.password=PASSWORD.
+   ```
+
+3. 使用@PropertySource加载jdbc.properties配置文件
+
+4. 修改@Value注解属性的值，将其修改为`${key}`，key就是键值对中的键的值
+
+   ```java
+   @PropertySource("jdbc.properties")
+   public class JdbcConfig {
+       @Value("${jdbc.driver}")
+       private String driver;
+       @Value("${jdbc.url}")
+       private String url;
+       @Value("${jdbc.username}")
+       private String username;
+       @Value("${jdbc.password}")
+       private String password;
+   
+       @Bean
+       public DataSource dataSource() {
+           DruidDataSource dataSource = new DruidDataSource();
+           dataSource.setDriverClassName(driver);
+           dataSource.setUrl(url);
+           dataSource.setUsername(username);
+           dataSource.setPassword(password);
+           return dataSource;
+       }
+   }
+   ```
+
+#### 引用数据类型
+
+假设在构建DataSource对象的时候，需要用到BookDao对象，该如何把BookDao对象注入进方法内让其使用呢?
+
+- `步骤一：`在SpringConfig中扫描BookDao
+  扫描的目的是让Spring能管理到BookDao，也就是要让IOC容器中有一个BookDao对象
+
+  ```java
+  @Configuration
+  @ComponentScan("com.blog.dao")
+  @Import(JdbcConfig.class)
+  public class SpringConfig {
+  }
+  ```
+
+- `步骤二：`在JdbcConfig类  的方法上添加参数
+  引用类型注入只需要为bean定义方法设置形参即可，容器会`根据类型`自动装配对象。
+
+  ```java
+  @Bean
+  public DataSource dataSource(BookDao bookDao) {
+      bookDao.save();
+      DruidDataSource dataSource = new DruidDataSource();
+      dataSource.setDriverClassName(driver);
+      dataSource.setUrl(url);
+      dataSource.setUsername(username);
+      dataSource.setPassword(password);
+      return dataSource;
+  }
+  ```
+
+## 注解开发总结
+
+![image-20241117143708520](./Spring.assets/image-20241117143708520.png)
+
+## Spring整合
+
+### Spring整合MyBatis
+
+- 步骤一：准备数据库表，MyBatis是用来操作数据库表的，所以我们先来创建库和表
+
+  ```sql
+  create database spring_db character set utf8;
+  use spring_db;
+  create table tbl_account(
+      id int primary key auto_increment,
+      name varchar(35),
+      money double
+  );
+  
+  INSERT INTO tbl_account(`name`,money) VALUES
+  ('Tom',2800),
+  ('Jerry',3000),
+  ('Jhon',3100);
+  ```
+
+- 导入依赖
+
+  ```xml
+      <dependencies>
+          <dependency>
+              <groupId>org.springframework</groupId>
+              <artifactId>spring-context</artifactId>
+              <version>6.1.11</version>
+          </dependency>
+          <dependency>
+              <groupId>com.alibaba</groupId>
+              <artifactId>druid</artifactId>
+              <version>1.1.16</version>
+          </dependency>
+  
+          <dependency>
+              <groupId>org.mybatis</groupId>
+              <artifactId>mybatis</artifactId>
+              <version>3.5.9</version>
+          </dependency>
+  
+          <dependency>
+              <groupId>mysql</groupId>
+              <artifactId>mysql-connector-java</artifactId>
+              <version>8.0.28</version>
+          </dependency>
+          <dependency>
+              <groupId>junit</groupId>
+              <artifactId>junit</artifactId>
+              <version>RELEASE</version>
+              <scope>test</scope>
+          </dependency>
+      </dependencies>
+  ```
+
+- 步骤三：根据表创建模型类
+
+  ```java
+  package org.sza.pojo;
+  
+  public class Account {
+      private Integer id;
+      private String name;
+      private Double money;
+  
+      public Account() {
+      }
+  
+      public Account(Integer id, String name, double money) {
+          this.id = id;
+          this.name = name;
+          this.money = money;
+      }
+  
+      public Integer getId() {
+          return id;
+      }
+  
+      public void setId(Integer id) {
+          this.id = id;
+      }
+  
+      public String getName() {
+          return name;
+      }
+  
+      public void setName(String name) {
+          this.name = name;
+      }
+  
+      public double getMoney() {
+          return money;
+      }
+  
+      public void setMoney(double money) {
+          this.money = money;
+      }
+  
+      @Override
+      public String toString() {
+          return "Account{" +
+                  "id=" + id +
+                  ", name='" + name + '\'' +
+                  ", money=" + money +
+                  '}';
+      }
+  }
+  ```
+
+- 步骤四：创建Mapper接口，一般是要配置一个对应的xml文件，不过这里没涉及到复杂的sql语句，所以没配置xml文件，采用注解开发）
+
+  ```java
+  public interface AccountMapper {
+      @Insert("insert into tbl_account(name, money) VALUES (#{name}, #{money})")
+      void save(Account account);
+  
+      @Delete("delete from tbl_account where id = #{id}")
+      void delete(Integer id);
+  
+      @Update("update tbl_account set `name` = #{name}, money = #{money}")
+      void update(Account account);
+  
+      @Select("select * from tbl_account")
+      List<Account> findAll();
+  
+      @Select("select * from tbl_account where id = #{id}")
+      Account findById(Integer id);
+  }
+  ```
+
+  
+
+
+

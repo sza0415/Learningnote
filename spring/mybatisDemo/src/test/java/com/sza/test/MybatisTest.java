@@ -1,9 +1,7 @@
 package com.sza.test;
 
-import com.sza.jojo.Brand;
-import com.sza.jojo.User;
+import com.sza.pojo.Brand;
 import com.sza.mapper.BrandMapper;
-import com.sza.mapper.UserMapper;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -12,9 +10,7 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class MybatisTest {
     @Test

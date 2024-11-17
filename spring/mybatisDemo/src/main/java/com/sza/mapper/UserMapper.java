@@ -1,6 +1,6 @@
 package com.sza.mapper;
 
-import com.sza.jojo.User;
+import com.sza.pojo.User;
 
 import java.util.List;
 
