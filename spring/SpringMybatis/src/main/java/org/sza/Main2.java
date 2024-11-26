@@ -2,7 +2,7 @@ package org.sza;
 
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.sza.config.SpringConfig;
-import org.sza.pojo.Account;
+import org.sza.entity.Account;
 import org.sza.service.AccountService;
 
 public class Main2 {

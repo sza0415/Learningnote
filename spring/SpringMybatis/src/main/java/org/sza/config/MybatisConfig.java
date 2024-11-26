@@ -5,14 +5,14 @@ import org.mybatis.spring.mapper.MapperScannerConfigurer;
 import org.springframework.context.annotation.Bean;
 
 import javax.sql.DataSource;
-import org.apache.ibatis.session.SqlSessionFactory;
+
 public class MybatisConfig {
     @Bean
     public SqlSessionFactoryBean sqlSessionFactory(DataSource dataSource) {
         //定义bean，SqlSessionFactoryBean，用于产生SqlSessionFactory对象
         SqlSessionFactoryBean sqlSessionFactory = new SqlSessionFactoryBean();
         //设置模型类的别名扫描
-        sqlSessionFactory.setTypeAliasesPackage("org.sza.pojo");
+        sqlSessionFactory.setTypeAliasesPackage("org.sza.entity");
         //设置数据源
         sqlSessionFactory.setDataSource(dataSource);
         return sqlSessionFactory;

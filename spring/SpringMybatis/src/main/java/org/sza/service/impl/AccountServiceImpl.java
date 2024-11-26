@@ -3,7 +3,7 @@ package org.sza.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.sza.mapper.AccountMapper;
-import org.sza.pojo.Account;
+import org.sza.entity.Account;
 import org.sza.service.AccountService;
 
 import java.util.List;

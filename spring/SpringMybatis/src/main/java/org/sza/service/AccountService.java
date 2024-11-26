@@ -1,7 +1,7 @@
 package org.sza.service;
 
 
-import org.sza.pojo.Account;
+import org.sza.entity.Account;
 
 import java.util.List;
 

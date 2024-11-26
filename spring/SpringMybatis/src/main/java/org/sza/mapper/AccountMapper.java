@@ -1,16 +1,11 @@
 package org.sza.mapper;
 
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
-import org.sza.pojo.Account;
+import org.apache.ibatis.annotations.*;
+import org.sza.entity.Account;
 
 import java.util.List;
 
-
+@Mapper
 public interface AccountMapper {
     @Insert("insert into tbl_account(name, money) VALUES (#{name}, #{money})")
     void save(Account account);
